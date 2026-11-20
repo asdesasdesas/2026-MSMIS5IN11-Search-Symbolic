@@ -1,0 +1,26 @@
+# Ne jamais commiter les jeux de données ni les graphes dérivés
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Exécutions locales : seuls les exemples anonymes sélectionnés sont inclus
+results/*
+!results/README.md
+!results/examples/
+
+# Clés / environnements / poids / caches / notebooks temporaires
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+.DS_Store
+node_modules/
+*.log

@@ -1,0 +1,45 @@
+{
+  "created_utc": "2026-11-20T20:43:40.035805+00:00",
+  "input": "data/raw/primaryschool.csv.gz",
+  "n_nodes": 242,
+  "n_edges": 8317,
+  "min_contacts": 1,
+  "k": [
+    5,
+    12
+  ],
+  "methods": [
+    "random",
+    "degree",
+    "betweenness",
+    "pagerank",
+    "closeness",
+    "kcore",
+    "greedy",
+    "ilp",
+    "ilp_deg",
+    "strength",
+    "greedy_edges",
+    "ilp_edges"
+  ],
+  "runs": 35,
+  "random_draws": 5,
+  "gamma": 0.2,
+  "beta": 0.007935775906486912,
+  "r0_target": 3.0,
+  "target_attack": null,
+  "calibration": null,
+  "n_seeds": 3,
+  "seed": 42,
+  "transmission": "uniform",
+  "seed_policy": "fixed",
+  "ilp_time_limit": 8.0,
+  "baseline": {
+    "mean": 0.8597402597402597,
+    "std": 0.034367922676124645,
+    "median": 0.8553719008264463,
+    "p_major": 1.0
+  },
+  "python": "3.13.5",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+}

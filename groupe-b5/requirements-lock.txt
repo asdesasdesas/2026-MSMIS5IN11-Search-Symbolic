@@ -1,0 +1,10 @@
+# Versions exactes réellement présentes lors de la vérification locale (Python 3.11 dans l'environnement de création).
+# Ensemble de dépendances directes ; leurs dépendances transitives sont résolues par pip.
+numpy==2.3.5
+scipy==1.17.0
+pandas==2.2.3
+networkx==3.6.1
+matplotlib==3.10.8
+pytest==9.0.2
+notebook==7.5.3
+nbformat==5.10.4
