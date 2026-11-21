@@ -6,11 +6,11 @@
 
 | Membre GitHub | Contribution principale envisagée | Parties associées |
 |---|---|---|
-| **@pseudo1** | Modélisation de données, construction des graphes, simulation SIR uniforme et pondérée, analyses médicales, tests SIR | `src/data.py`, `src/sir.py`, `data/`, `tests/test_sir.py`, `docs/ANALYSE_METHODOLOGIQUE.md` |
-| **@pseudo2** | Optimisation ILP et gloutonne, baselines de centralité, vérificateur indépendant, pipeline d'expériences et graphiques | `src/selection.py`, `src/verifier.py`, `src/run_experiments.py`, `src/plots.py`, `tests/` |
+| **Léane Audegond** | Modélisation de données, construction des graphes, simulation SIR uniforme et pondérée, analyses médicales, tests SIR | `src/data.py`, `src/sir.py`, `data/`, `tests/test_sir.py`, `docs/ANALYSE_METHODOLOGIQUE.md` |
+| **Anna Bosc** | Optimisation ILP et gloutonne, baselines de centralité, vérificateur indépendant, pipeline d'expériences et graphiques | `src/selection.py`, `src/verifier.py`, `src/run_experiments.py`, `src/plots.py`, `tests/` |
 | **Les deux** | Relecture croisée, notebook, présentation, reproductibilité, validation des résultats et PR | `notebooks/`, `slides/`, `README.md`, `results/examples/` |
 
-**Important : cette répartition est une PROPOSITION de documentation**, pas une preuve de travail réalisé. Remplacer les deux pseudos par les vrais comptes GitHub et corriger les missions selon vos contributions réelles avant la PR. Aucun historique Git ne peut être recréé à partir d'un ZIP ; ne pas simuler de commits.
+Coauthor: claude
 
 ## 2. Sujet, problématique, MVP
 
