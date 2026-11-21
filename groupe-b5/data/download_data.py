@@ -20,7 +20,7 @@ DATASETS = {
     "high_school_2011": "https://networks.skewed.de/net/sp_high_school_new/files/2011.csv.zip",
     "high_school_2012": "https://networks.skewed.de/net/sp_high_school_new/files/2012.csv.zip",
     # Fichiers bruts SocioPatterns, tels qu'utilisés pour les expériences du projet.
-    "hospital_raw": "https://www.sociopatterns.org/wp-content/uploads/2013/09/detailed_list_of_contacts_Hospital.dat.gz",
+    "hospital_raw": "https://sociopatterns.org/assets/data/hospital_lyon_contacts.dat.gz",
     "primary_school_raw": "https://www.sociopatterns.org/wp-content/uploads/2015/09/primaryschool.csv.gz",
 }
 MANUAL = {
