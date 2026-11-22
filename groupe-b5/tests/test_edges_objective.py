@@ -13,9 +13,7 @@ from src.selection import (cut_weight, select_greedy_edges, select_ilp_edges, se
                            solve_ilp_edges, total_weight)
 
 
-# ----------------------------------------------------------------------------
 # Outils de test
-# ----------------------------------------------------------------------------
 def brute_force_cut(G, k):
     # Vérité terrain : on teste toutes les combinaisons de k personnes
     # et on garde le plus grand poids coupé (réservé aux petits graphes).
@@ -30,9 +28,7 @@ def weighted_path():
     return G
 
 
-# ----------------------------------------------------------------------------
 # Objectif "contacts coupés" : calcul et méthodes de sélection
-# ----------------------------------------------------------------------------
 def test_cut_weight_counts_each_contact_once():
     G = weighted_path()
     assert cut_weight(G, [1]) == 5 + 2             # la personne 1 coupe ses deux contacts
@@ -106,7 +102,7 @@ def test_ilp_edges_solver_without_solution_falls_back_to_greedy(monkeypatch):
     assert res["selected"] == sorted(select_greedy_edges(G, 4))
 
 
-# ---------------- vérificateur indépendant : objectif "cut_weight" ----------------
+# vérificateur indépendant : objectif "cut_weight"
 @pytest.fixture
 def small(tmp_path):
     # Fixture : prépare pour chaque test un petit graphe (12 personnes) et le relit
@@ -180,7 +176,7 @@ def test_verifier_rejects_unknown_objective(small):
     assert any("objectif inconnu" in e for e in errors)
 
 
-# ---------------- pipeline complet ----------------
+# pipeline complet
 def test_pipeline_edge_methods(tmp_path):
     G = synthetic_graph(n_groups=3, group_size=12, seed=2)
     # beta calibré pour un R0 de 3 ; peu de simulations (runs=20) pour que le test reste rapide

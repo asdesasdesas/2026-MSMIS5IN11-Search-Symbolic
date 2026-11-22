@@ -18,7 +18,7 @@ from src.selection import (coverage, select_degree, select_greedy_coverage, sele
                            solve_ilp_coverage)
 
 
-# ---------- données manquantes ou aberrantes ----------
+# données manquantes ou aberrantes
 # Principe commun : `match=` vérifie que le MESSAGE d'erreur est parlant
 # (un mot-clé précis), pas seulement qu'une erreur quelconque est levée.
 # tmp_path est un dossier temporaire fourni par pytest, supprimé après chaque test.
@@ -83,7 +83,7 @@ def test_zip_with_unknown_node_ids(tmp_path):
         load_graph(f)
 
 
-# ---------- instance infaisable ou dégénérée ----------
+# instance infaisable ou dégénérée
 # parametrize : le même test est lancé pour trois méthodes différentes,
 # ce qui vérifie que toutes appliquent les mêmes règles sur k.
 @pytest.mark.parametrize("method", [select_degree, select_greedy_coverage, select_ilp_coverage])
@@ -123,7 +123,7 @@ def test_more_initial_cases_than_people_is_capped():
     assert sir.evaluate(p, [], beta=0.0, gamma=0.5, n_runs=3, n_seeds=50)["mean"] == 1.0
 
 
-# ---------- solveur qui ne termine pas ----------
+# solveur qui ne termine pas
 def test_solver_without_solution_falls_back_to_greedy(monkeypatch):
     """Si le solveur ne rend rien dans le temps imparti, on répond avec le glouton et on le dit."""
     # Faux résultat de solveur : aucune solution trouvée avant la limite de temps
@@ -146,7 +146,7 @@ def test_real_solver_with_tiny_time_limit_never_crashes():
         assert res["status"]                     # un message de statut non vide l'explique
 
 
-# ---------- vérificateur face à des fichiers cassés ----------
+# vérificateur face à des fichiers cassés
 def test_verifier_survives_bad_files(tmp_path, capsys):
     # capsys capture ce que le programme affiche, pour pouvoir le tester
     G = synthetic_graph(n_groups=2, group_size=5, seed=1)
@@ -168,7 +168,7 @@ def test_verifier_empty_folder(tmp_path):
     assert verifier.verify(tmp_path / "g.json", tmp_path / "vide") == 1
 
 
-# ---------- réseau indisponible (téléchargement) ----------
+# réseau indisponible (téléchargement)
 def _load_download_script():
     # Le script de téléchargement n'est pas dans le paquet src : on le charge à la main depuis
     # son chemin (data/download_data.py, à la racine du projet, au-dessus du dossier des tests)

@@ -15,13 +15,11 @@ from src.selection import coverage, select_ilp_degree, solve_ilp_coverage
 
 def degree_sum(G, sel):
     # Utilitaire : somme des degrés des personnes sélectionnées
-    # (c'est la quantité que le départage "degree" cherche à maximiser)
+    # (c'est la quantité que le départage "degree" cherche à maximiser).
     return sum(G.degree(v) for v in sel)
 
 
-# ----------------------------------------------------------------------------
 # ILP avec départage
-# ----------------------------------------------------------------------------
 # Deux décorateurs parametrize empilés : pytest lance le test pour chaque couple
 # (seed, k), soit 5 x 2 = 10 cas, sur 10 petits graphes aléatoires différents.
 @pytest.mark.parametrize("seed", range(5))
@@ -85,9 +83,7 @@ def test_second_stage_failure_keeps_first_stage_solution(monkeypatch):
     assert coverage(G, res["selected"]) == res["objective"]
 
 
-# ----------------------------------------------------------------------------
 # Métriques SIR
-# ----------------------------------------------------------------------------
 def test_summarize_separates_the_two_populations():
     # Deux petites épidémies (4 % et 5 %) et deux grandes (80 % et 90 %) ;
     # seuil à 20 % pour les distinguer.
@@ -115,9 +111,7 @@ def test_evaluate_reports_major_outbreak_probability():
     assert sir.evaluate(p, list(G.nodes), beta=1.0, gamma=0.1, n_runs=5)["p_major"] == 0.0
 
 
-# ----------------------------------------------------------------------------
 # Pipeline complet
-# ----------------------------------------------------------------------------
 def test_run_pipeline_end_to_end_and_verifier(tmp_path):
     """run() -> fichiers -> vérificateur indépendant : tout doit être cohérent."""
     # tmp_path : dossier temporaire fourni par pytest, supprimé après le test

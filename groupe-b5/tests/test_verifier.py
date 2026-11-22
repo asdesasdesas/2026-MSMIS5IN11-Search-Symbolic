@@ -8,9 +8,7 @@ from src.data import save_graph_json, synthetic_graph
 from src.selection import coverage, select_greedy_coverage, select_ilp_coverage
 
 
-# ----------------------------------------------------------------------------
 # Outils de test
-# ----------------------------------------------------------------------------
 @pytest.fixture
 def small(tmp_path):
     # Fixture : pour chaque test qui la demande, on prépare un petit graphe (12 personnes),
@@ -31,9 +29,7 @@ def solution(G, selected, method="greedy", optimal=None, **override):
     return sol
 
 
-# ----------------------------------------------------------------------------
 # Accord entre les deux implémentations
-# ----------------------------------------------------------------------------
 def test_verifier_coverage_matches_selection_code():
     """Deux implémentations indépendantes de la couverture doivent toujours donner le même résultat."""
     # 10 graphes aléatoires différents, et trois valeurs de k par graphe
@@ -46,9 +42,7 @@ def test_verifier_coverage_matches_selection_code():
             assert verifier.covered_count(adj, sel) == coverage(G, sel)
 
 
-# ----------------------------------------------------------------------------
 # Une solution valide est acceptée
-# ----------------------------------------------------------------------------
 def test_valid_solutions_pass(small):
     G, adj, _ = small
     # liste d'erreurs vide = solution valide ; ici une solution gloutonne (sans prétention d'optimalité)...
@@ -57,9 +51,7 @@ def test_valid_solutions_pass(small):
     assert verifier.check_solution(adj, solution(G, select_ilp_coverage(G, 2), "ilp", True)) == []
 
 
-# ----------------------------------------------------------------------------
 # Les erreurs sont détectées : un test par type d'erreur
-# ----------------------------------------------------------------------------
 def test_wrong_k_detected(small):
     G, adj, _ = small
     # 2 personnes sélectionnées, mais la solution annonce k=3
@@ -107,9 +99,7 @@ def test_fake_optimal_claim_detected(small):
         assert any("optimale" in e for e in errors)
 
 
-# ----------------------------------------------------------------------------
 # Vérification d'un dossier entier et code de sortie
-# ----------------------------------------------------------------------------
 def test_verify_folder_and_exit_code(small, tmp_path, capsys):
     G, _, graph_path = small
     folder = tmp_path / "sols"
