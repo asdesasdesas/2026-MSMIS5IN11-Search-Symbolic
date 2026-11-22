@@ -1,0 +1,46 @@
+{
+  "created_utc": "2026-11-22T21:31:09.455520+00:00",
+  "input": "data/raw/hospital.dat.gz",
+  "n_nodes": 75,
+  "n_edges": 1139,
+  "min_contacts": 1,
+  "k": [
+    2,
+    6,
+    10
+  ],
+  "methods": [
+    "random",
+    "degree",
+    "betweenness",
+    "pagerank",
+    "closeness",
+    "kcore",
+    "greedy",
+    "ilp",
+    "ilp_deg",
+    "strength",
+    "greedy_edges",
+    "ilp_edges"
+  ],
+  "runs": 200,
+  "random_draws": 10,
+  "gamma": 0.2,
+  "beta": 0.017442839859722205,
+  "r0_target": 3.0,
+  "target_attack": null,
+  "calibration": null,
+  "n_seeds": 3,
+  "seed": 42,
+  "transmission": "uniform",
+  "seed_policy": "fixed",
+  "ilp_time_limit": 12.0,
+  "baseline": {
+    "mean": 0.8151999999999999,
+    "std": 0.1560943750951597,
+    "median": 0.8466666666666667,
+    "p_major": 0.965
+  },
+  "python": "3.13.7",
+  "platform": "Windows-11-10.0.26300-SP0"
+}
