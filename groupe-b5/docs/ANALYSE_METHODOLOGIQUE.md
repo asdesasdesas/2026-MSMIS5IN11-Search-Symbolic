@@ -353,8 +353,207 @@ python -c "from src.data import load_graph; import networkx as nx; [print('Seuil
 Les données téléchargées restent dans le dossier `data/raw/`
 et ne sont pas versionnées sur GitHub.
 
+## 6. Validation du modèle SIR
 
-## 6. Résultats exploratoires
+### 6.1. Objectif de la validation
+
+Afin de vérifier le fonctionnement du modèle SIR avant de lancer
+les expériences sur les données réelles, nous avons réalisé
+plusieurs tests sur des graphes simples dont le comportement
+attendu est connu.
+
+Ces vérifications permettent de compléter les tests automatisés
+du projet et de mieux comprendre l'influence des différents
+paramètres sur la propagation de l'épidémie.
+
+Les 147 tests automatisés du projet ont également été exécutés
+avec succès après l'ajout de commentaires dans le fichier `sir.py`.
+
+### 6.2. Vérification de la transmission et de l'immunisation
+
+Les trois premiers tests sont réalisés sur un graphe en chaîne
+de cinq personnes, avec un seul cas initial, une probabilité
+de guérison gamma = 1 et une graine aléatoire de 42.
+
+| Test | Beta | Personnes immunisées | Taux attendu | Taux obtenu |
+|---|---|---|---|---|
+| Absence de transmission | 0 | Aucune | 20 % | 20 % |
+| Transmission maximale | 1 | Aucune | 100 % | 100 % |
+| Immunisation du nœud central | 1 | Nœud 2 | 40 % | 40 % |
+
+Lorsque beta = 0, aucune nouvelle contamination ne se produit.
+Le taux d'attaque de 20 % correspond uniquement à la personne
+infectée initialement.
+
+Lorsque beta = 1, dans le modèle uniforme, l'épidémie atteint
+l'ensemble des personnes du graphe connecté en l'absence
+d'intervention.
+
+Enfin, lorsque le nœud central est immunisé, la propagation
+est bloquée entre les deux parties du graphe. Seules deux
+personnes sur cinq sont infectées.
+
+Ces résultats illustrent l'intérêt d'une sélection stratégique
+des individus pour interrompre les chaînes de transmission.
+
+### 6.3. Vérification des politiques d'infection initiale
+
+Afin de vérifier la différence entre les politiques `fixed`
+et `resample`, nous avons utilisé un graphe de cinq personnes
+avec les paramètres suivants :
+
+- beta = 0 ;
+- gamma = 1 ;
+- un seul candidat à l'infection initiale ;
+- graine aléatoire de 42.
+
+Le premier candidat à l'infection initiale est le nœud 4.
+Cette personne est volontairement immunisée avant la simulation.
+
+| Politique | Taux attendu | Taux obtenu |
+|---|---|---|
+| fixed | 0 % | 0 % |
+| resample | 20 % | 20 % |
+
+Avec la politique `fixed`, la personne immunisée n'est pas
+remplacée et l'épidémie ne démarre pas.
+
+Avec la politique `resample`, une autre personne non immunisée
+est choisie comme cas initial, ce qui explique le taux
+d'attaque de 20 %.
+
+La politique `fixed` est retenue pour nos expériences principales
+afin de conserver les mêmes candidats à l'infection initiale
+entre les différentes stratégies de sélection.
+
+Elle permet également de prendre en compte la prévention
+des infections initiales par l'intervention.
+
+### 6.4. Vérification du modèle SIR pondéré
+
+Nous avons construit deux graphes en chaîne de trois personnes,
+possédant la même structure mais des poids différents :
+
+- Graphe A : deux arêtes de poids 10 et 10.
+- Graphe B : deux arêtes de poids 1 et 19.
+
+Les deux graphes possèdent le même poids moyen, égal à 10.
+
+Pour chaque configuration, nous avons réalisé 1000 simulations
+avec beta = 0,5, gamma = 1, un infecté initial, aucune personne
+immunisée et une graine aléatoire de départ de 42.
+
+| Modèle | Graphe A | Graphe B |
+|---|---|---|
+| Uniforme | 59,57 % | 59,57 % |
+| Pondéré | 53,37 % | 49,33 % |
+
+Dans le modèle uniforme, les résultats sont identiques puisque
+les poids des arêtes ne sont pas pris en compte.
+
+Dans le modèle pondéré, les taux d'attaque moyens diffèrent
+de 4,04 points de pourcentage.
+
+Dans le graphe B, le contact de poids élevé facilite la
+transmission entre deux personnes, tandis que le contact
+de faible poids limite la propagation vers la troisième.
+
+Cette expérience montre que la répartition des poids influence
+la propagation simulée, même lorsque la structure du graphe
+et le poids moyen restent identiques.
+
+Cependant, ces résultats ne permettent pas de conclure que
+le modèle pondéré produit systématiquement moins de contaminations
+que le modèle uniforme. Le paramètre beta n'a pas exactement
+la même signification dans les deux modèles.
+
+### 6.5. Vérification de la calibration de R0
+
+La cohérence des fonctions `beta_for_r0()` et `estimate_r0()`
+a été vérifiée sur le graphe hospitalier, constitué de 75
+nœuds et 1139 arêtes, avec un seuil de contacts égal à 1.
+
+| Paramètre | Valeur |
+|---|---|
+| R0 cible | 3 |
+| Gamma | 0,2 |
+| Beta calculé | 0,01744284 |
+| Transmissibilité T | 0,08152602 |
+| R0 estimé | 3,0 |
+
+La valeur de beta obtenue correspond à une probabilité
+de transmission d'environ 1,74 % par voisin susceptible
+et par pas de simulation dans le modèle uniforme.
+
+La transmissibilité T correspond à une probabilité d'environ
+8,15 % de contaminer un voisin susceptible au cours de la
+période infectieuse, en considérant la transmission par
+cette arête.
+
+Le calcul inverse permet de retrouver exactement le R0 cible.
+
+Cette vérification confirme la cohérence mathématique des
+deux fonctions. Elle ne constitue cependant pas une validation
+clinique de R0, puisque la formule utilisée reste approximative.
+
+### 6.6. Vérification de la calibration du taux d'attaque
+
+Pour le modèle pondéré, nous avons vérifié la fonction
+`calibrate_beta_for_attack()` sur le graphe hospitalier.
+
+L'objectif est d'obtenir un taux d'attaque moyen proche de
+75 % en l'absence d'intervention.
+
+Les paramètres utilisés sont les suivants :
+
+- gamma = 0,2 ;
+- trois candidats à l'infection initiale ;
+- aucune personne immunisée ;
+- 100 simulations par valeur de beta testée ;
+- 12 itérations de dichotomie ;
+- politique d'infection initiale `fixed` ;
+- graine aléatoire de départ de 999.
+
+| Indicateur | Valeur |
+|---|---|
+| Beta calibré | 0,03112793 |
+| Taux d'attaque cible | 75,00 % |
+| Taux d'attaque obtenu | 74,35 % |
+| Écart absolu | 0,65 point |
+| Objectif atteint | True |
+
+L'écart obtenu est inférieur à la tolérance de cinq points
+de pourcentage définie dans le programme.
+
+La calibration est donc considérée comme réussie pour
+les paramètres et l'échantillon de simulations utilisés.
+
+Cette calibration reste une approximation fondée sur des
+simulations Monte-Carlo. Le taux d'attaque obtenu peut varier
+avec le nombre de simulations et les graines aléatoires.
+
+### 6.7. Bilan de la validation
+
+Les sept vérifications pratiques ont produit des résultats
+cohérents avec les comportements attendus.
+
+Elles ont notamment permis de vérifier :
+
+- les cas extrêmes de transmission ;
+- le blocage de la propagation par immunisation ;
+- les politiques de sélection des cas initiaux ;
+- l'influence des poids sur les simulations ;
+- la cohérence de la calibration de R0 ;
+- la calibration du taux d'attaque du modèle pondéré.
+
+Ces vérifications permettent de poursuivre les expériences
+sur les données hospitalières avec davantage de confiance
+dans le fonctionnement du modèle.
+
+Elles constituent une validation fonctionnelle et numérique,
+et non une validation clinique du modèle épidémiologique.
+
+## 7. Résultats exploratoires
 
 Le dossier `results/examples/` contient les premiers résultats
 obtenus à partir des données hospitalières et scolaires, sans
@@ -392,9 +591,9 @@ variabilité des résultats permettent d'améliorer la robustesse
 des comparaisons.
 
 
-## 7. Analyse des limites, des échecs et des risques
+## 8. Analyse des limites, des échecs et des risques
 
-### 7.1. Limites de l'optimisation
+### 8.1. Limites de l'optimisation
 
 La couverture des voisinages constitue un indicateur structurel
 du réseau et non une mesure directe du risque épidémique.
@@ -407,7 +606,7 @@ d'attaque différents.
 Le choix d'une fonction objectif influence donc les personnes
 sélectionnées et l'efficacité de l'intervention simulée.
 
-### 7.2. Limites liées aux données
+### 8.2. Limites liées aux données
 
 L'agrégation des contacts en un graphe statique entraîne une
 perte de l'information temporelle : l'ordre chronologique
@@ -424,7 +623,7 @@ période et dans un lieu précis. La généralisation des résultats
 Le choix du seuil de contacts constitue également une hypothèse
 de prétraitement pouvant modifier la structure du réseau.
 
-### 7.3. Limites biologiques et médicales
+### 8.3. Limites biologiques et médicales
 
 Le modèle SIR utilisé repose sur plusieurs simplifications :
 
@@ -439,7 +638,7 @@ Le modèle SIR utilisé repose sur plusieurs simplifications :
 Les résultats doivent donc être interprétés comme des résultats
 de simulation et non comme des prédictions médicales réelles.
 
-### 7.4. Variabilité des simulations
+### 8.4. Variabilité des simulations
 
 Les infections initiales, les contaminations et les guérisons
 reposent sur des tirages aléatoires.
@@ -455,7 +654,7 @@ Des différences de quelques points entre deux méthodes ne
 permettent pas nécessairement d'affirmer que l'une est
 meilleure que l'autre.
 
-### 7.5. Limites techniques et reproductibilité
+### 8.5. Limites techniques et reproductibilité
 
 Le temps de résolution de l'ILP peut augmenter avec la taille
 et la complexité du graphe.
@@ -477,7 +676,7 @@ Les dépendances et les paramètres expérimentaux sont documentés
 afin de faciliter la reproduction des expériences.
 
 
-## 8. Extensions possibles
+## 9. Extensions possibles
 
 Plusieurs extensions pourraient être envisagées pour améliorer
 le projet :
