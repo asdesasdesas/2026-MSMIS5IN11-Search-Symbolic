@@ -1,5 +1,6 @@
 """Graphiques pour le notebook et le rapport."""
 from __future__ import annotations
+from matplotlib.transforms import Bbox
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -12,6 +13,8 @@ STYLES = {  # une couleur / un marqueur par méthode, pour que les figures soien
     "degree": ("tab:blue", "o"),
     "betweenness": ("tab:orange", "s"),
     "pagerank": ("tab:purple", "^"),
+    "closeness": ("navy", "<"),
+    "kcore": ("darkgoldenrod", ">"),
     "greedy": ("tab:green", "D"),
     "ilp": ("tab:red", "*"),
     "ilp_deg": ("tab:brown", "P"),
@@ -22,6 +25,56 @@ STYLES = {  # une couleur / un marqueur par méthode, pour que les figures soien
 # Pour une méthode absente de la table, les fonctions ci-dessous utilisent
 # STYLES.get(méthode, (None, "o")) : couleur automatique de matplotlib, marqueur rond.
 
+# Décalages (en points) utilisés à tour de rôle pour que deux étiquettes voisines ne se chevauchent pas
+# Positions d'étiquette essayées dans l'ordre : (décalage x, décalage y en points, alignement horizontal, vertical)
+_CANDIDATES = [
+    (8, 6, "left", "bottom"), (8, -6, "left", "top"),
+    (-8, 6, "right", "bottom"), (-8, -6, "right", "top"),
+    (0, 10, "center", "bottom"), (0, -10, "center", "top"),
+    (18, 20, "left", "bottom"), (18, -20, "left", "top"),
+    (-18, 20, "right", "bottom"), (-18, -20, "right", "top"),
+    (0, 28, "center", "bottom"), (0, -28, "center", "top"),
+]
+
+
+def _label_points(ax, points, fontsize=8):
+    """Écrit le nom de chaque méthode près de son point, sans chevauchement.
+
+    À appeler EN DERNIER (après les échelles, les titres et tight_layout), car la
+    place disponible se calcule sur le graphique tel qu'il sera dessiné.
+    Les méthodes aux valeurs (x, y) identiques partagent une seule étiquette.
+    """
+    groups = {}
+    for x, y, name in points:
+        groups.setdefault((round(float(x), 6), round(float(y), 6)), []).append(name)
+    fig = ax.figure
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    axbox = ax.get_window_extent(renderer)
+    keys = sorted(groups)
+    pad = 7 * fig.dpi / 72
+    # zones déjà occupées : d'abord tous les marqueurs, puis les étiquettes posées
+    taken = [Bbox([[px - pad, py - pad], [px + pad, py + pad]]) for px, py in ax.transData.transform(keys)]
+    for key in keys:
+        text = "\n".join(groups[key])
+        best = None  # (score, candidat, zone)
+        for cand in _CANDIDATES:
+            dx, dy, ha, va = cand
+            ann = ax.annotate(text, key, textcoords="offset points", xytext=(dx, dy),
+                              fontsize=fontsize, ha=ha, va=va)
+            box = ann.get_window_extent(renderer)
+            ann.remove()
+            inside = (axbox.x0 <= box.x0 and box.x1 <= axbox.x1 and
+                      axbox.y0 <= box.y0 and box.y1 <= axbox.y1)
+            score = sum(box.overlaps(t) for t in taken) + (0 if inside else 100)
+            if best is None or score < best[0]:
+                best = (score, cand, box)
+            if score == 0:
+                break
+        _, (dx, dy, ha, va), box = best
+        ax.annotate(text, key, textcoords="offset points", xytext=(dx, dy),
+                    fontsize=fontsize, ha=ha, va=va)
+        taken.append(box)
 
 def plot_attack_rate(df, baseline: float, path=None, title="Taux d'attaque selon la méthode"):
     """Taux d'attaque moyen (fraction de la population infectée) en fonction de k."""
@@ -71,32 +124,27 @@ def plot_objective_alignment(df, k=None, path=None):
     A gauche : couverture des voisinages. A droite : contacts coupés. Si l'objectif est un bon proxy,
     les points descendent de gauche à droite (plus d'objectif = moins d'infectés).
     """
-    # k par défaut : la plus grande valeur testée
     k = df["k"].max() if k is None else k
     sub = df[df["k"] == k]  # une ligne par méthode, pour ce k seulement
-    # deux graphiques côte à côte ; sharey=True : même axe vertical, donc comparables
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True)
-    # (colonne à mettre en abscisse, libellé de l'axe) pour chaque panneau
     panels = [("coverage_pct", "couverture des voisinages (% de la population)"),
               ("cut_pct", "contacts coupés (% du poids total des contacts)")]
     for ax, (col, label) in zip(axes, panels):
-        # un point par méthode : x = valeur de l'objectif, y = taux d'attaque obtenu
         for _, row in sub.iterrows():
             color, marker = STYLES.get(row["method"], (None, "o"))
             ax.scatter(row[col], row["attack_mean"], color=color, marker=marker, s=80)
-            # le nom de la méthode est écrit à côté du point (décalage en points d'écran)
-            ax.annotate(row["method"], (row[col], row["attack_mean"]),
-                        textcoords="offset points", xytext=(5, 4), fontsize=8)
-        # coefficient de corrélation de Pearson entre objectif et taux d'attaque ;
-        # si tous les x sont identiques (écart-type nul), il n'est pas défini : on met NaN
+        # corrélation de Pearson ; NaN si tous les x sont identiques
         r = np.corrcoef(sub[col], sub["attack_mean"])[0, 1] if sub[col].std() > 0 else float("nan")
+        ax.margins(x=0.12, y=0.12)  # marge autour des points : place pour les étiquettes
         ax.set_xlabel(label)
         ax.set_title(f"corrélation avec le taux d'attaque : {r:.2f}", fontsize=10)
         ax.grid(alpha=0.3)
-    # un seul libellé vertical suffit, puisque l'axe est partagé
     axes[0].set_ylabel("taux d'attaque moyen (plus bas = mieux)")
     fig.suptitle(f"L'objectif optimisé est-il un bon proxy ? (k = {k})")
     fig.tight_layout()
+    # étiquettes en dernier, une fois la mise en page figée
+    for ax, (col, _) in zip(axes, panels):
+        _label_points(ax, [(r[col], r["attack_mean"], r["method"]) for _, r in sub.iterrows()])
     if path:
         fig.savefig(path, dpi=150)
     return fig
@@ -115,30 +163,29 @@ def plot_time(df, path=None):
     ax.set_xlabel("k = nombre de personnes ciblées")
     ax.set_ylabel("temps de sélection (s, échelle log)")
     ax.set_title("Temps de calcul")
-    ax.legend()
+    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=8)
     ax.grid(alpha=0.3, which="both")  # "both" : grille aussi sur les graduations secondaires du log
     fig.tight_layout()
     if path:
-        fig.savefig(path, dpi=150)
+        fig.savefig(path, dpi=150, bbox_inches="tight")
     return fig
 
 
 def plot_quality_vs_time(df, k: int, path=None):
     """Compromis qualité / temps pour un k donné : en bas à gauche = meilleur."""
     sub = df[df["k"] == k]  # on fixe k : un seul point par méthode
-    fig, ax = plt.subplots(figsize=(6, 4.5))
+    fig, ax = plt.subplots(figsize=(7, 5))
     for _, row in sub.iterrows():
         color, marker = STYLES.get(row["method"], (None, "o"))
-        # x = temps de calcul, y = taux d'attaque : un bon compromis est rapide ET protège bien
         ax.scatter(row["time_s"], row["attack_mean"], color=color, marker=marker, s=90)
-        ax.annotate(row["method"], (row["time_s"], row["attack_mean"]),
-                    textcoords="offset points", xytext=(6, 4))
     ax.set_xscale("log")  # temps en échelle log, comme pour plot_time
+    ax.margins(x=0.15, y=0.12)
     ax.set_xlabel("temps de sélection (s, échelle log)")
     ax.set_ylabel("taux d'attaque moyen (plus bas = mieux)")
     ax.set_title(f"Qualité contre temps de calcul (k = {k})")
     ax.grid(alpha=0.3)
     fig.tight_layout()
+    _label_points(ax, [(r["time_s"], r["attack_mean"], r["method"]) for _, r in sub.iterrows()], fontsize=9)
     if path:
         fig.savefig(path, dpi=150)
     return fig
