@@ -1,27 +1,30 @@
 # B5 — Qui tester en priorité ? Optimisation sur un graphe de contacts
 
-> Projet pédagogique EPF · optimisation combinatoire, ILP, algorithmes gloutons et graphes de contacts SocioPatterns. **La simulation SIR sert à évaluer les sélections ; ce n'est pas un projet d'apprentissage supervisé.**
+> Projet B5 — IA exploratoire et symbolique, EPF, 2026-2027. Nous comparons plusieurs stratégies de sélection sur des réseaux de contacts SocioPatterns. Les simulations SIR nous servent à évaluer leur effet sur la propagation d’une épidémie.
 
-## 1. Groupe et contributions proposées
+## 1. Membres du groupe et répartition du travail
 
-| Membre GitHub | Contribution principale envisagée | Parties associées |
+| Membre (GitHub) | Travail réalisé | Fichiers principaux |
 |---|---|---|
-| **Léane Audegond** | Modélisation de données, construction des graphes, simulation SIR uniforme et pondérée, analyses médicales, tests SIR | `src/data.py`, `src/sir.py`, `data/`, `tests/test_sir.py`, `docs/ANALYSE_METHODOLOGIQUE.md` |
-| **Anna Bosc** | Optimisation ILP et gloutonne, baselines de centralité, vérificateur indépendant, pipeline d'expériences et graphiques | `src/selection.py`, `src/verifier.py`, `src/run_experiments.py`, `src/plots.py`, `tests/` |
-| **Les deux** | Relecture croisée, notebook, présentation, reproductibilité, validation des résultats et PR | `notebooks/`, `slides/`, `README.md`, `results/examples/` |
+| `pseudo1` | Préparation des données SocioPatterns, construction des graphes, simulations SIR uniforme et pondérée, tests du modèle et analyse méthodologique | `src/data.py`, `src/sir.py`, `data/`, `tests/test_sir.py`, `docs/ANALYSE_METHODOLOGIQUE.md` |
+| `pseudo2` | Méthodes d’optimisation (glouton, ILP et centralités), vérificateur indépendant, exécution des expériences et génération des graphiques | `src/selection.py`, `src/verifier.py`, `src/run_experiments.py`, `src/plots.py`, `tests/` |
+| Travail commun | Relectures, validation des résultats, préparation de la démonstration et de la soutenance | `notebooks/`, `slides/`, `README.md`, `results/examples/` |
 
-Coauthor: claude
+Nous avons utilisé des assistants IA, notamment ChatGPT et Claude, pour nous aider à comprendre et développer certaines parties du code, à rédiger la documentation et à analyser les résultats. Nous avons exécuté les expériences en local et vérifié les sorties avec les tests et le vérificateur du projet.
 
-## 2. Sujet, problématique, MVP
+## 2. Présentation du projet
 
-- **Sujet du catalogue : B5.** Avec un budget limité `k` de vaccins ou d'isolements, quels individus choisir pour maximiser la couverture d'un graphe de contacts, et quels effets ont ces choix sur la propagation simulée ?
-- **MVP réalisé :** construction de graphes SocioPatterns (hôpital, école primaire), ILP exact pour couverture, glouton monotone sous-modulaire, baselines aléatoire/degré/centralités, simulations SIR, mesures de qualité et de temps, vérificateur indépendant, tests automatisés.
-- **Extensions réalisées :** objectif alternatif de contacts pondérés coupés (`greedy_edges`, `ilp_edges`), départage des optimums de couverture par degré (`ilp_deg`), centralités `closeness` et `kcore`, scénario de transmission SIR pondérée par durée, calibration optionnelle de `beta` par taux d'attaque cible.
-- **Non réalisé :** graphe temporel et budgets différenciés. Ces éléments sont des perspectives, pas des fonctionnalités à promettre dans la soutenance.
+Notre sujet est le **B5 — « Qui tester en priorité ? »**. Nous cherchons à déterminer quelles personnes cibler sur un réseau de contacts lorsqu’on dispose d’un budget d’intervention limité à `k` personnes.
 
-### Interprétation médicale
+Nous avons d’abord construit des graphes à partir de deux jeux de données SocioPatterns : un réseau de contacts dans un hôpital et un réseau dans une école primaire. Nous avons ensuite implémenté plusieurs méthodes pour choisir les personnes à immuniser, notamment des méthodes fondées sur les centralités du graphe, un algorithme glouton et une formulation en programmation linéaire en nombres entiers (ILP).
 
-Le modèle SIR suppose que les personnes ciblées sont **immédiatement immunisées ou parfaitement isolées**. Cela ne modélise **pas** le dépistage seul ; un vrai test exige de tenir compte du résultat, de la sensibilité/spécificité et des actions qui suivent. C'est un scénario idéal de prévention, non une recommandation clinique. Voir `docs/ANALYSE_METHODOLOGIQUE.md`.
+Pour comparer ces sélections, nous avons développé un simulateur épidémiologique SIR et mesuré le taux d’attaque, la couverture du réseau, les contacts coupés et les temps de calcul. Nous avons également ajouté un modèle SIR pondéré par la durée cumulée des contacts, ainsi qu’un second objectif d’optimisation portant sur le poids des contacts coupés.
+
+Nous n’avons pas implémenté de graphe temporel ni de budget d’intervention différent selon les individus.
+
+### Hypothèses médicales
+
+Nous avons fait l’hypothèse que les personnes sélectionnées sont **immédiatement et parfaitement immunisées** (ou isolées de façon parfaite). Notre simulation ne représente donc pas le dépistage seul, car un test n’empêche pas directement une contamination. Il faudrait notamment modéliser les résultats des tests, leur fiabilité et les mesures prises ensuite. Les résultats sont ceux d’un modèle pédagogique et ne constituent pas une recommandation médicale. Nous détaillons ces choix dans [`docs/ANALYSE_METHODOLOGIQUE.md`](docs/ANALYSE_METHODOLOGIQUE.md).
 
 ## 3. Architecture
 
@@ -40,41 +43,68 @@ src/run_experiments.py   # budget k, métriques, CSV, config JSON, PNG
        │
        ├── src/plots.py           # visualisations
        └── src/verifier.py        # contrôle indépendant via JSON (standard library)
-
 notebooks/analyse.ipynb    # démonstration explicative
-results/examples/          # résultats agrégés exploratoires réels (SANS données brutes)
-slides/                    # PPTX et PDF de soutenance (chiffres exploratoires)
+results/examples/          # résultats expérimentaux réels agrégés (SANS données brutes)
+slides/                    # supports de soutenance
 tests/                     # pytest (non régression, erreurs, calibration)
 ```
 
 Le vérificateur indépendant n'importe ni le solveur, ni NetworkX, ni le code de sélection : il reconstruit la couverture et le poids coupé à partir des sorties JSON. Il vérifie que les sélections sont de taille **exactement k** et compare à la force brute sur les petits graphes.
 
-## 4. Théorie et méthodes
 
-Pour G=(V,E), on sélectionne `S ⊆ V`, `|S|=k`.
+## 4. Méthodes de sélection
 
-**Objectif obligatoire :** maximiser `f(S)=|∪_{v∈S} ({v} ∪ N(v))|` (couverture des voisinages fermés).
+Pour un graphe $G=(V,E)$, nous sélectionnons un ensemble de personnes $S \subseteq V$ avec $|S|=k$.
 
-**ILP :** `x_i` indique une personne sélectionnée, `y_j` une personne couverte ; `max Σ y_j`, avec `y_j ≤ Σ_{i∈N[j]} x_i`, `Σ x_i=k`, `x_i∈{0,1}`, `0≤y_j≤1`.
+**Objectif principal :** maximiser la couverture des voisinages fermés :
 
-**Glouton :** ajouter à chaque étape la personne au plus grand gain marginal de couverture. Pour ce problème monotone sous-modulaire avec budget cardinal, le score glouton est au moins `1−1/e ≈ 63,2 %` du maximum (borne sur la **couverture**, pas sur les infections).
+$$
+f(S) = \left|\bigcup_{v \in S} \left(\{v\} \cup N(v)\right)\right|
+$$
 
-**Extension pondérée :** maximiser `g(S)=Σ_{e=(u,v)} w_e · 1[u∈S ou v∈S]` ; ILP avec `z_e ≤ x_u+x_v` ; glouton sur les contacts non encore coupés.
+**ILP :** nous utilisons une variable binaire $x_i$ pour indiquer si une personne est sélectionnée et une variable $y_j$ pour indiquer si elle est couverte. La formulation consiste à maximiser :
+
+$$
+\sum_{j \in V} y_j
+$$
+
+sous les contraintes :
+
+$$
+y_j \leq \sum_{i \in N[j]} x_i
+$$
+
+$$
+\sum_{i \in V} x_i = k
+$$
+
+avec $x_i \in \{0,1\}$ et $0 \leq y_j \leq 1$.
+
+**Glouton :** à chaque étape, nous ajoutons la personne qui apporte le plus grand gain marginal de couverture. Pour cet objectif monotone sous-modulaire et une contrainte de cardinalité, l'algorithme glouton garantit au moins $1-1/e \approx 63,2\,\%$ de la valeur optimale. Cette garantie concerne la couverture du réseau et non directement la réduction des infections.
+
+**Objectif complémentaire :** nous cherchons également à maximiser le poids total des contacts coupés :
+
+$$
+g(S) = \sum_{e=(u,v)\in E} w_e \cdot \mathbf{1}[u\in S \text{ ou } v\in S]
+$$
+
+Pour cet objectif, nous utilisons une formulation ILP avec la contrainte $z_e \leq x_u+x_v$ ainsi qu'un algorithme glouton qui privilégie les contacts pondérés non encore coupés.
 
 | Méthode | Type | Ce qui est optimisé / classé |
 |---|---|---|
-| `random` | baseline | k personnes tirées au hasard (plusieurs tirages) |
-| `degree`, `betweenness`, `pagerank` | centralités | nombre de voisins, intermédiarité, PageRank |
-| `closeness`, `kcore`, `strength` | centralités/extension V2 | proximité, k-core, force pondérée |
-| `greedy`, `ilp` | méthodes principales | couverture des voisinages |
-| `ilp_deg` | extension | couverture optimale puis départage par somme des degrés |
-| `greedy_edges`, `ilp_edges` | extension | poids total des contacts coupés |
+| `random` | Référence aléatoire | k personnes tirées au hasard |
+| `degree`, `betweenness`, `pagerank` | Centralités | Degré, intermédiarité, PageRank |
+| `closeness`, `kcore`, `strength` | Centralités | Proximité, k-core, force pondérée |
+| `greedy`, `ilp` | Méthodes principales | Couverture des voisinages |
+| `ilp_deg` | Méthode complémentaire | Couverture puis départage par degré |
+| `greedy_edges`, `ilp_edges` | Méthodes complémentaires | Poids total des contacts coupés |
 
-`optimal=True` signifie que le solveur a **prouvé l'optimum** ; sinon la solution existe mais n'est pas certifiée, avec un repli glouton explicite si le solveur n'en fournit pas. Ne jamais appeler une solution « optimale » si `optimal=False`.
+Pour les méthodes ILP, le statut `optimal=True` indique que le solveur a prouvé l'optimalité pour la fonction objectif considérée. Si aucune solution exploitable n'est trouvée, notre programme utilise un repli glouton. Une solution optimale pour la couverture n'est pas nécessairement celle qui réduit le plus les infections.
 
-## 5. Installation reproductible
 
-Python 3.11 ou 3.12 conseillé (versions exactes des dépendances testées via Python de l'environnement de vérification).
+## 5. Installation
+
+Le projet utilise Python 3.11 ou 3.12 et les dépendances indiquées dans les fichiers `requirements`.
 
 ```bash
 cd groupe-b5
@@ -85,7 +115,7 @@ python -m pip install -r requirements-lock.txt
 # Sans exigence de verrouillage strict : python -m pip install -r requirements.txt
 ```
 
-`.env.example` est présent par conformité aux consignes : **aucun secret ni aucune variable externe n'est nécessaire**. Ni GPU, ni API, ni compte utilisateur.
+Le projet fonctionne sans GPU et sans API externe. Nous avons conservé un fichier `.env.example`, mais aucune clé n’est nécessaire.
 
 ### Données réelles SocioPatterns
 
@@ -94,112 +124,134 @@ python data/download_data.py hospital_raw
 python data/download_data.py primary_school_raw
 ```
 
-Si les URL changent ou si le réseau est indisponible, ouvrir les pages listées dans `data/README.md` puis déposer manuellement `hospital.dat.gz` et `primaryschool.csv.gz` dans `data/raw/`. Les données brutes ne sont **pas** présentes dans l'archive finale et ne doivent pas être commitées.
+Si les URL changent ou si le réseau est indisponible, ouvrir les pages listées dans `data/README.md` puis déposer manuellement `hospital.dat.gz` et `primaryschool.csv.gz` dans `data/raw/`. Les données brutes ne sont **pas** versionnées dans le dépôt.
 
 ## 6. Utilisation
 
 Depuis la racine `groupe-b5/` :
 
-**A. Démo sans réseau, valable même si les données manquent :**
+**A. Simulation sur un graphe synthétique :**
 
 ```bash
 python -m src.run_experiments --synthetic --name demo --k 2 4 8 --runs 50 --random-draws 5 --seed-policy fixed
 ```
 
-**B. Hôpital, transmission uniforme (MVP) :**
+**B. Hôpital — SIR uniforme :**
 
 ```bash
-python -m src.run_experiments --input data/raw/hospital.dat.gz --name hospital_uniform \
-  --k 2 6 10 --runs 55 --random-draws 5 --r0 3 \
-  --seed-policy fixed --seed 42 --ilp-time-limit 12
+python -m src.run_experiments --input data/raw/hospital.dat.gz --name hospital_uniform_final --k 2 6 10 --runs 200 --random-draws 10 --r0 3 --seed-policy fixed --seed 42 --ilp-time-limit 12
 ```
 
-**C. Hôpital, transmission pondérée par durée (extension de V2) :**
+**C. Hôpital — SIR pondéré :**
 
 ```bash
-python -m src.run_experiments --input data/raw/hospital.dat.gz --name hospital_weighted \
-  --transmission weighted --target-attack 0.75 --calibration-runs 30 \
-  --k 2 6 10 --runs 55 --random-draws 5 \
-  --seed-policy fixed --seed 42 --ilp-time-limit 12
+python -m src.run_experiments --input data/raw/hospital.dat.gz --name hospital_weighted_final --transmission weighted --target-attack 0.75 --calibration-runs 100 --k 2 6 10 --runs 200 --random-draws 10 --seed-policy fixed --seed 42 --ilp-time-limit 12
 ```
 
-**D. École primaire, deuxième jeu réel :**
+**D. École primaire — SIR uniforme :**
 
 ```bash
-python -m src.run_experiments --input data/raw/primaryschool.csv.gz --name primary_uniform \
-  --k 5 12 --runs 35 --random-draws 5 --r0 3 \
-  --seed-policy fixed --seed 42 --ilp-time-limit 8
+python -m src.run_experiments --input data/raw/primaryschool.csv.gz --name primary_uniform_final --k 5 12 --runs 200 --random-draws 5 --r0 3 --seed-policy fixed --seed 42 --ilp-time-limit 8
 ```
 
-Sous PowerShell, mettre chaque commande sur **une seule ligne** (les `\` de continuation sont prévus pour Linux/macOS). Pour des conclusions finales, augmenter `--runs` à **200–1000** et répéter plusieurs graines.
+Nous avons utilisé 200 simulations SIR pour les expériences finales. Les commandes sont écrites sur une ligne pour pouvoir être copiées directement dans PowerShell.
 
-**Choisir une intervention et sa calibration :** `--transmission uniform` utilise une probabilité `beta` constante ; `--transmission weighted` utilise `p_ij = 1 − exp(-beta × w_ij / moyenne(w))`. `--r0` n'est pertinent que pour le modèle uniforme. Pour le modèle pondéré, utiliser `--target-attack` ou `--beta`. `--seed-policy fixed` garde les mêmes cas initiaux potentiels avant intervention, même s'ils sont ensuite immunisés (sans remplacement). `resample` reproduit le comportement historique de la V1.
+**Paramètres de simulation :** `--transmission uniform` utilise une probabilité `beta` constante ; `--transmission weighted` utilise `p_ij = 1 − exp(-beta × w_ij / moyenne(w))`. `--r0` n'est pertinent que pour le modèle uniforme. Pour le modèle pondéré, utiliser `--target-attack` ou `--beta`. `--seed-policy fixed` garde les mêmes cas initiaux potentiels avant intervention, même s'ils sont ensuite immunisés (sans remplacement). `resample` remplace un cas initial qui aurait été immunisé.
 
-**Reproduire les trois scénarios en une commande :** après téléchargement des deux jeux, lancer `python scripts/reproduce_examples.py` (ou `--quick` pour un essai plus court). Les paramètres réels de la commande standard sont ceux des exemples documentés ci-dessus. Une explication de la fusion figure dans `docs/FUSION_V1_V2.md`.
+Un script supplémentaire, `python scripts/reproduce_examples.py`, permet de lancer les scénarios prédéfinis (`--quick` pour un essai plus court). Les commandes détaillées ci-dessus correspondent aux expériences finales étudiées dans notre analyse.
 
-**Sorties par expérience :** `results/<nom>/results.csv`, `config.json` (paramètres, machine, baseline), `solutions/*.json`, 5 graphiques PNG. Le graphe JSON pour vérification est écrit dans `data/processed/<nom>_graph.json`.
+**Sorties par expérience :** `results/<nom>/results.csv`, `config.json` (paramètres, machine, baseline), `solutions/*.json`, 5 graphiques PNG. Le graphe JSON pour vérification est écrit dans `data/processed/<nom>\_graph.json`.
 
 ## 7. Tests et vérificateur indépendant
 
 ```bash
 python -m pytest -q
-# Exemple après exécution du scénario hôpital :
-python -m src.verifier --graph data/processed/hospital_uniform_graph.json \
-  --solutions results/hospital_uniform/solutions --strict
 ```
 
-**Dernière exécution locale lors de la préparation de cette archive : 147 tests réussis, 0 échec.** Les scénarios réels fournis ont également été exécutés et **leurs fichiers de solutions ont été vérifiés en mode strict**. Les tests comprennent : optimum ILP comparé à la force brute sur petits graphes, garantie du glouton, vérification des poids, contraintes k, test de régression SIR uniforme, nouveaux tests de transmission pondérée, reproductibilité, calibration impossible, solveur limité en temps, données absentes/corrompues, réseau indisponible, tests du pipeline et de ses sorties.
+Vérification indépendante des **deux expériences hospitalières finales**, après leur exécution :
 
-Cette sortie est propre à l'environnement de création ; reproduisez-la sur votre ordinateur et gardez la sortie réelle pour la soutenance. Le vérificateur démontre la **faisabilité** et la cohérence des objectifs. Sur un grand graphe il ne recalcule **pas** un optimum exponentiel en temps ; la preuve d'optimalité est le statut du solveur ILP.
+```bash
+python -m src.verifier --graph data/processed/hospital_uniform_final_graph.json --solutions results/hospital_uniform_final/solutions --strict
+python -m src.verifier --graph data/processed/hospital_weighted_final_graph.json --solutions results/hospital_weighted_final/solutions --strict
+```
 
-## 8. Résultats exploratoires (mesurés sur des données réelles)
+**Nous avons obtenu 147 tests automatisés réussis, sans échec.** Les contrôles indépendants en mode strict ont validé **36/36 solutions** pour le scénario hospitalier uniforme et **36/36 solutions** pour le scénario pondéré, soit **72/72 solutions valides**. Les tests comprennent notamment l'optimum ILP comparé à la force brute sur petits graphes, les contraintes de cardinalité, les modèles SIR, les poids, la reproductibilité et la calibration.
 
-Les données sources proviennent des deux archives initiales. Elles ont été utilisées localement, **non ajoutées à la livraison**. Les fichiers `config.json` et `results.csv` dans `results/examples/` donnent tous les détails, et les images peuvent être réutilisées pour l'oral.
+Notre vérificateur contrôle la **faisabilité** des sélections et la cohérence des métriques. Il ne démontre pas l’optimalité des solutions sur les grands graphes : celle-ci dépend du statut retourné par le solveur ILP.
 
-| Jeu / scénario | Personnes / contacts distincts | Répétitions SIR par méthode et budget | Budgets k |
+## 8. Résultats expérimentaux (données réelles)
+
+Nous avons téléchargé et utilisé les données SocioPatterns en local, sans les ajouter au dépôt. Les fichiers `config.json`, `results.csv` et cinq graphiques PNG par scénario sont conservés dans `results/examples/hospital_uniform_final/` et `results/examples/hospital_weighted_final/`. Le détail des analyses, des intervalles de confiance et des limites se trouve dans [`docs/ANALYSE_METHODOLOGIQUE.md`](docs/ANALYSE_METHODOLOGIQUE.md).
+
+| Jeu / scénario | Personnes / arêtes | Répétitions SIR | Budgets k |
 |---|---:|---:|---|
-| Hôpital, uniforme | 75 / 1 139 | 55 (50 pour les tirages aléatoires) | 2, 6, 10 |
-| Hôpital, pondéré | 75 / 1 139 | 55 (50 pour les tirages aléatoires) | 2, 6, 10 |
-| École, uniforme | 242 / 8 317 | 35 (50 pour les tirages aléatoires) | 5, 12 |
+| Hôpital, uniforme final | 75 / 1 139 | 200 par sélection évaluée ; 10 tirages aléatoires | 2, 6, 10 |
+| Hôpital, pondéré final | 75 / 1 139 | 200 par sélection évaluée ; 10 tirages aléatoires | 2, 6, 10 |
+| École, uniforme (`primary_uniform_final`, voir rapport) | 242 / 8 317 | 200 | 5, 12 |
 
-À l'hôpital avec `k=10`, **taux de réduction moyen relatif** (par rapport au SIR sans intervention dans le même scénario) :
+**Paramètres des expériences hospitalières :** en uniforme, `beta = 0,01744`, `gamma = 0,2`, `R0` cible de 3 et taux d'attaque **sans intervention de 81,5 %**. En pondéré, `beta = 0,03162`, `gamma = 0,2`, cible de calibration de 75 % (75,5 % obtenu à la calibration) et taux d'attaque de référence final de **73,1 %**.
 
-| Méthode | Uniforme | Pondéré |
-|---|---:|---:|
-| Degré | 45,3 % | 44,4 % |
-| Glouton couverture | 40,9 % | 38,6 % |
-| ILP couverture (sans départage) | **23,4 %** | **14,4 %** |
-| ILP + départage degré | 40,2 % | 39,0 % |
-| ILP contacts pondérés | 38,9 % | 46,3 % |
+### Comparaison sur l'hôpital pour k = 10
 
-Toutes les sélections ILP de couverture de `k=10` couvrent 100 % des personnes, pourtant elles n'entraînent **pas** le même taux d'attaque en SIR. Cela montre que maximiser la couverture des voisinages **n'est pas identique** à minimiser la taille de l'épidémie. Le scénario pondéré peut reclasser certaines méthodes.
+| Méthode | Taux d'attaque uniforme | Taux d'attaque pondéré | Réduction relative uniforme | Réduction relative pondérée |
+|---|---:|---:|---:|---:|
+| `random` | 64,1 % | 57,7 % | 21,4 % | 21,0 % |
+| `degree` | **41,9 %** | 38,2 % | **48,6 %** | 47,8 % |
+| `betweenness` | 44,8 % | 40,2 % | 45,0 % | 45,0 % |
+| `pagerank` | **41,9 %** | 38,2 % | **48,6 %** | 47,8 % |
+| `closeness` | **41,9 %** | 38,2 % | **48,6 %** | 47,8 % |
+| `kcore` | 46,4 % | **32,8 %** | 43,1 % | **55,2 %** |
+| `strength` | 46,4 % | **32,8 %** | 43,1 % | **55,2 %** |
+| `greedy` | 46,4 % | 39,8 % | 43,1 % | 45,6 % |
+| `ilp` | 63,9 % | 60,5 % | 21,6 % | 17,2 % |
+| `ilp_deg` | 45,2 % | 39,5 % | 44,6 % | 45,9 % |
+| `greedy_edges` | 46,4 % | **32,8 %** | 43,1 % | **55,2 %** |
+| `ilp_edges` | 46,4 % | **32,8 %** | 43,1 % | **55,2 %** |
 
-**Lecture de la baseline aléatoire :** les métriques de la ligne `random` du CSV sont des moyennes sur plusieurs sélections ; le fichier `solutions/random_k*.json` enregistre une seule sélection représentative afin de permettre la vérification indépendante de sa faisabilité. Sa couverture n'est donc pas nécessairement égale à la couverture moyenne du CSV. Pour les scénarios fournis, chaque tirage aléatoire possède 10 simulations SIR, soit 50 mesures au total.
+_*Le taux d'attaque est la fraction moyenne de la population infectée au cours des simulations. Plus il est faible, mieux c'est. La réduction relative est calculée par rapport à la référence _**propre à chaque scénario**_.*_
 
-**Ces résultats sont illustratifs et exploratoires** : 35/55 répétitions restent insuffisantes pour conclure à quelques points près. Les taux varient avec les graines, le modèle, les paramètres de calibration et le nombre de répétitions. Les temps mesurés ne sont pas transférables à un autre PC. Ne pas comparer directement les réductions des deux scénarios comme si leur `beta` avait la même signification : leurs baselines ont été calibrées différemment.
+Pour `k = 10`, `degree`, `pagerank` et `closeness` obtiennent les plus faibles moyennes en **uniforme** (41,9 %), tandis que `kcore`, `strength`, `greedy_edges` et `ilp_edges` obtiennent les plus faibles moyennes en **pondéré** (32,8 %). Le classement observé dépend donc du modèle de transmission.
 
-## 9. Limites et plan B
+**Lien entre couverture et propagation :** `ilp` couvre les 75 personnes pour `k = 10` dans les deux scénarios, mais son taux d'attaque reste de 63,9 % en uniforme et de 60,5 % en pondéré. Des ensembles ayant la même couverture peuvent avoir des effets épidémiques différents.
+
+**Temps de calcul :** pour `k = 10` en pondéré, `greedy_edges` et `ilp_edges` ont le même taux d'attaque moyen (32,8 %), avec des temps de sélection affichés de 0,0071 s et 0,0475 s. Ces temps proviennent d'une exécution et ne constituent pas un benchmark répété.
+
+**Variabilité des simulations :** dans le scénario uniforme (`k = 10`), l'IC 95 % du taux d'attaque de `degree` est d'environ [38,7 % ; 45,2 %] contre [61,8 % ; 66,4 %] pour `random`. En pondéré, l'IC de `strength` est d'environ [29,9 % ; 35,6 %] contre [55,3 % ; 60,1 %] pour `random`. Le chevauchement d'autres intervalles ne suffit pas à départager les méthodes proches ; des comparaisons appariées seraient utiles.
+
+**Sélection aléatoire :** les métriques de `random` agrègent plusieurs sélections ; le fichier `solutions/random_k*.json` contient une sélection représentative pour contrôler sa faisabilité, et sa couverture peut donc différer de la moyenne affichée dans le CSV.
+
+**Comparaison des modèles :** les deux scénarios ont été calibrés différemment et n’ont pas le même taux d’attaque sans intervention. Le classement des méthodes s’interprète donc principalement **à l’intérieur de chaque scénario**. Les résultats relèvent d’une simulation pédagogique avec immunisation parfaite, et non d’un modèle clinique de dépistage.
+
+## 9. Limites du projet
 
 - Modèle SIR stylisé sans âge, incubation, symptomatologie, sensibilité/spécificité des tests, délai, observance ou validation clinique.
+
 - Graphe statique : perte de l'ordre temporel, pas de contraintes d'horaires ; contacts pondérés = hypothèse de risque approximative.
+
 - Les graphes agrégés ne représentent pas nécessairement une transmission vraie ; `R0` calculé est une approximation structurelle limitée au modèle uniforme.
+
 - Comparaison Monte-Carlo : p-values ou intervalles de différences non calculés ; des écarts faibles peuvent être du bruit.
+
 - ILP NP-difficile en général ; le coût peut exploser sur un graphe plus grand ; limites de temps et repli explicites.
-- Sans téléchargement possible : `--synthetic` fonctionne hors ligne avec tous les algorithmes ; les exemples PNG/CSV dans `results/examples/` servent de démonstration enregistrée.
-- Échec du solveur, instance infaisable, données absentes et poids invalides sont testés ; pas de dépendance GPU ou API.
 
-## 10. Répartition, organisation Git et soumission
+- La simulation sur graphe synthétique permet de présenter le fonctionnement du programme sans avoir besoin de télécharger les données.
 
-La répartition proposée en §1 doit être validée. Les ZIP fournis ne contiennent **aucun historique de collaboration** ; les vrais commits, branches, auteurs et revues doivent être vérifiés dans votre fork. Faire une PR uniquement vers `jsboigeEPF/2026-MSMIS5IN11-Search-Symbolic:main`, avec **un seul dossier `groupe-b5/`** à la racine. Ne pas supprimer les fichiers du professeur ou d'autres groupes. Utiliser le modèle et la checklist de PR. **Date limite : lundi 23 novembre 2026 à 23h59. Soutenance : mercredi 25 novembre 2026.** Voir `docs/CHECKLIST_AVANT_PR.md` et `docs/PLAN_ORAL.md`.
+- Nous avons testé plusieurs cas d’erreur, notamment les données absentes ou invalides et les limites du solveur.
 
-## 11. Licences et références
+## 10. Bilan
 
-- **Code : licence à approuver par les deux membres avant publication.** Proposition MIT documentée dans `docs/LICENCE_CODE_A_VALIDER.md` ; ne pas annoncer cette proposition comme déjà adoptée.
-- **Données :** licence et attribution SocioPatterns à vérifier sur la page du jeu exact ; origine, notices et articles dans `data/README.md`. Aucune donnée brute copiée dans l'archive finale.
-- **Bibliothèques :** NumPy, SciPy/HiGHS, pandas, NetworkX, Matplotlib, pytest et Notebook, sous leurs licences tierces respectives.
-- Kempe, Kleinberg & Tardos (2003), *Maximizing the spread of influence through a social network*, KDD.
-- Nemhauser, Wolsey & Fisher (1978), *An analysis of approximations for maximizing submodular set functions*.
+Nos expériences montrent qu’une sélection fondée sur la structure du réseau peut réduire davantage la propagation simulée qu’une sélection aléatoire. Nous avons aussi observé que les méthodes les plus efficaces ne sont pas forcément les mêmes avec un modèle SIR uniforme et un modèle pondéré. Enfin, une solution optimale pour la couverture des voisinages ne garantit pas le meilleur résultat épidémiologique. Ces constats restent limités aux jeux de données et aux hypothèses étudiés. Le détail des résultats et des limites figure dans notre analyse méthodologique.
+
+## 11. Sources et références
+
+- **Données :** les jeux de contacts proviennent de SocioPatterns ; les références et les indications de téléchargement sont regroupées dans `data/README.md`. Les données brutes ne sont pas redistribuées dans le dépôt.
+
+- **Dépendances :** NumPy, SciPy/HiGHS, pandas, NetworkX, Matplotlib, pytest et Notebook, sous leurs licences tierces respectives.
+
+- Kempe, Kleinberg & Tardos (2003), **Maximizing the spread of influence through a social network**, KDD.
+
+- Nemhauser, Wolsey & Fisher (1978), **An analysis of approximations for maximizing submodular set functions**.
+
 - Cours : [Search-09-LinearProgramming](https://github.com/jsboige/CoursIA/blob/main/MyIA.AI.Notebooks/Search/Part1-Foundations/Search-09-LinearProgramming.ipynb), [Search-04-LocalSearch](https://github.com/jsboige/CoursIA/blob/main/MyIA.AI.Notebooks/Search/Part1-Foundations/Search-04-LocalSearch.ipynb).
-- Données : [SocioPatterns](http://www.sociopatterns.org/datasets/), Vanhems et al. (2013) et Stehlé et al. (2011).
 
-**Pour les dernières vérifications**, suivre `docs/CHECKLIST_AVANT_PR.md`. Ne pas supprimer les fichiers de consignes du dépôt amont ni inclure les ZIP sources dans votre fork.
+- Données : [SocioPatterns](http://www.sociopatterns.org/datasets/), Vanhems et al. (2013) et Stehlé et al. (2011).

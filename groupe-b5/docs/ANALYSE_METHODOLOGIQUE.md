@@ -12,36 +12,56 @@ formant un ensemble S.
 Deux objectifs d'optimisation sont étudiés :
 
 - **Couverture des voisinages** :
-  f(S) = |∪_{v∈S} ({v} ∪ N(v))|.
-  L'objectif est de maximiser le nombre de personnes couvertes.
-  Une personne est considérée comme couverte si elle est sélectionnée
-  ou si elle est voisine d'au moins une personne sélectionnée.
+
+  $$
+  f(S) = \left|\bigcup_{v \in S} \left(\{v\} \cup N(v)\right)\right|
+  $$
+
+  L'objectif est de maximiser le nombre de personnes couvertes. Une personne est considérée comme couverte si elle est sélectionnée ou si elle est voisine d'au moins une personne sélectionnée.
 
 - **Contacts coupés pondérés** :
-  g(S) = ∑_{e=(u,v)∈E} w_e × 1[u∈S ou v∈S].
-  L'objectif est de maximiser le poids total des contacts neutralisés
-  par la sélection. Chaque arête est comptée une seule fois, même si
-  ses deux extrémités sont sélectionnées.
+
+  $$
+  g(S) = \sum_{e=(u,v)\in E} w_e \cdot \mathbf{1}[u\in S \text{ ou } v\in S]
+  $$
+
+  L'objectif est de maximiser le poids total des contacts neutralisés par la sélection. Chaque arête est comptée une seule fois, même si ses deux extrémités sont sélectionnées.
+
 
 ### Formulation ILP
 
-Pour la couverture des voisinages :
+**Pour la couverture des voisinages :**
 
-- x_v ∈ {0,1} : indique si le nœud v est sélectionné ;
-- y_u ∈ [0,1] : indique si le nœud u est couvert ;
-- objectif : maximiser ∑ y_u ;
-- contraintes : y_u ≤ ∑_{v∈N[u]} x_v et ∑ x_v = k.
+- $x_v \in \{0,1\}$ : indique si le nœud v est sélectionné ;
+- $y_u \in [0,1]$ : indique si le nœud u est couvert ;
+- Objectif : maximiser $\sum_{u \in V} y_u$ ;
+- Contraintes :
 
-Pour les contacts coupés pondérés :
+  $$
+  y_u \leq \sum_{v \in N[u]} x_v
+  $$
 
-- x_v ∈ {0,1} : indique si le nœud v est sélectionné ;
-- z_e ∈ [0,1] : indique si l'arête e est neutralisée ;
-- objectif : maximiser ∑ w_e z_e ;
-- contraintes : z_e ≤ x_u + x_v et ∑ x_v = k.
+  $$
+  \sum_{v \in V} x_v = k
+  $$
 
-Les variables auxiliaires peuvent être continues, car leurs coefficients
-dans la fonction objectif sont non négatifs et la maximisation permet
-d'atteindre la valeur 1 lorsqu'un élément est couvert.
+**Pour les contacts coupés pondérés :**
+
+- $x_v \in \{0,1\}$ : indique si le nœud v est sélectionné ;
+- $z_e \in [0,1]$ : indique si l'arête e est neutralisée ;
+- Objectif : maximiser $\sum_{e \in E} w_e z_e$ ;
+- Contraintes :
+
+  $$
+  z_e \leq x_u + x_v \quad \forall e=(u,v)\in E
+  $$
+
+  $$
+  \sum_{v \in V} x_v = k
+  $$
+
+Les variables auxiliaires peuvent être continues, car leurs coefficients dans la fonction objectif sont non négatifs et la maximisation permet d'atteindre la valeur 1 lorsqu'un élément est couvert.
+
 
 ### Propriétés de l'algorithme glouton
 
@@ -68,7 +88,6 @@ l'algorithme glouton est prévu et signalé.
 
 Pour l'ILP avec départage par degré, l'optimalité du départage n'est
 validée qu'après preuve d'optimalité de la seconde étape.
-
 
 ## 2. Hypothèses médicales
 
@@ -98,7 +117,6 @@ Ces éléments ne sont pas modélisés dans le MVP.
 Notre projet constitue donc un **modèle pédagogique d'aide à la
 sélection**, et non une recommandation clinique ou un outil de tri
 utilisable directement dans un établissement de santé.
-
 
 ## 3. Modèles de simulation SIR
 
@@ -145,7 +163,9 @@ réelle, comme une journée.
 Dans le modèle `weighted`, la probabilité de transmission dépend
 du poids de chaque arête :
 
-p_ij = 1 - exp(-beta × w_ij / moyenne(w))
+$$
+p_{ij} = 1 - e^{-\beta \frac{w_{ij}}{\overline{w}}}
+$$
 
 avec :
 
@@ -198,7 +218,6 @@ des infections initiales.
 La répétition des simulations permet de limiter l'influence des
 tirages aléatoires sur les résultats.
 
-
 ## 4. Protocole de comparaison équitable
 
 Afin de comparer les différentes méthodes de sélection dans des
@@ -236,8 +255,9 @@ conditions similaires, le protocole suivant est utilisé :
    son optimalité a été prouvée.
 
 8. Augmenter le nombre de répétitions des simulations
-   (200 à 1000) et, si possible, étudier la sensibilité aux
-   paramètres beta, gamma et aux graines aléatoires.
+   (200 répétitions ont été utilisées pour les expériences finales
+   sur les réseaux hospitalier et scolaire), et, si possible, étudier
+   la sensibilité aux paramètres beta, gamma et aux graines aléatoires.
 
 Il est essentiel de distinguer **la qualité de l'optimisation
 combinatoire** de **la performance épidémiologique**.
@@ -245,6 +265,22 @@ combinatoire** de **la performance épidémiologique**.
 Une solution optimale pour la couverture des voisinages ne garantit
 pas nécessairement le taux d'attaque le plus faible.
 
+### Calcul de la réduction relative du taux d'attaque
+
+Pour évaluer l'efficacité d'une intervention, nous calculons la réduction relative du taux d'attaque par rapport au scénario sans immunisation :
+
+$$
+\text{Réduction relative (\%)} = \frac{A_0 - A_k}{A_0} \times 100
+$$
+
+avec :
+
+- \(A_0\) : taux d'attaque moyen sans intervention ;
+- \(A_k\) : taux d'attaque moyen après immunisation de k personnes.
+
+Une réduction positive indique que l'intervention diminue le taux d'attaque moyen. Une réduction négative signifie que le taux d'attaque observé est supérieur à celui du scénario sans intervention.
+
+Cette mesure permet de comparer l'efficacité relative des méthodes au sein d'un même scénario épidémiologique.
 
 ## 5. Influence du seuil de contacts sur la construction du graphe
 
@@ -285,7 +321,9 @@ graphe par rapport au nombre maximal d'arêtes possibles.
 
 Pour un graphe non orienté sans boucle, elle est calculée par :
 
-Densité = 2E / (N × (N - 1))
+$$
+D = \frac{2E}{N(N-1)}
+$$
 
 avec N le nombre de nœuds et E le nombre d'arêtes.
 
@@ -372,7 +410,8 @@ avec succès après l'ajout de commentaires dans le fichier `sir.py`.
 ### 6.2. Vérification de la transmission et de l'immunisation
 
 Les trois premiers tests sont réalisés sur un graphe en chaîne
-de cinq personnes, avec un seul cas initial, une probabilité
+de cinq personnes, avec un seul cas initial, le modèle uniforme, la politique `resample`,
+une probabilité
 de guérison gamma = 1 et une graine aléatoire de 42.
 
 | Test | Beta | Personnes immunisées | Taux attendu | Taux obtenu |
@@ -441,7 +480,7 @@ Les deux graphes possèdent le même poids moyen, égal à 10.
 
 Pour chaque configuration, nous avons réalisé 1000 simulations
 avec beta = 0,5, gamma = 1, un infecté initial, aucune personne
-immunisée et une graine aléatoire de départ de 42.
+immunisée, la politique `resample` et une graine aléatoire de départ de 42.
 
 | Modèle | Graphe A | Graphe B |
 |---|---|---|
@@ -553,7 +592,7 @@ dans le fonctionnement du modèle.
 Elles constituent une validation fonctionnelle et numérique,
 et non une validation clinique du modèle épidémiologique.
 
-## 7. Résultats exploratoires
+## 7. Résultats expérimentaux et analyse comparative
 
 Le dossier `results/examples/` contient les premiers résultats
 obtenus à partir des données hospitalières et scolaires, sans
@@ -592,30 +631,165 @@ des comparaisons.
 
 ### 7.1. Résultats sur l'école primaire (protocole final)
 
-Expérience `primary_uniform_final` : 242 personnes, 8317 arêtes, modèle
-uniforme (R0 = 3, gamma = 0,2), politique `fixed`, graine 42,
-200 réplicats, limite ILP de 8 s, k = 5 et k = 12. Sans intervention,
-le taux d'attaque moyen est de 0,832.
+Expérience `primary_uniform_final` : 242 personnes, 8317 arêtes, modèle uniforme (R0 = 3, gamma = 0,2), politique `fixed`, graine 42, 200 réplicats, limite ILP de 8 s, k = 5 et k = 12. Sans intervention, le taux d'attaque moyen est de 0,832.
 
-**Qualité contre temps.** À k = 12, le glouton atteint la même couverture
-que l'ILP (100 %) en 0,11 s contre 0,23 s. À k = 5, l'ILP trouve une
-meilleure couverture (97,5 % contre 95,5 %), prouvée optimale, mais en
-7,9 s contre 0,017 s. Pour l'objectif des contacts coupés, `greedy_edges`
-et `ilp_edges` donnent exactement les mêmes valeurs aux deux budgets,
-alors que l'ILP est nettement plus lent (6,1 s contre 0,34 s à k = 12).
+**Qualité contre temps.** À k = 12, le glouton atteint la même couverture que l'ILP (100 %) en 0,11 s contre 0,23 s. À k = 5, l'ILP trouve une meilleure couverture (97,5 % contre 95,5 %), prouvée optimale, mais en 7,9 s contre 0,017 s. Pour l'objectif des contacts coupés, `greedy_edges` et `ilp_edges` donnent exactement les mêmes valeurs aux deux budgets, alors que l'ILP est nettement plus lent (6,1 s contre 0,34 s à k = 12).
 
-**Objectif et épidémie.** Une meilleure couverture ne garantit pas moins
-d'infections : à k = 12, `ilp` couvre 100 % de la population mais réduit
-l'épidémie de 10,2 %, tandis que `betweenness` (95,9 % de couverture)
-la réduit de 12,9 %. L'optimalité prouvée porte sur l'objectif
-d'optimisation, pas sur la réduction des infections.
+**Objectif et épidémie.** Une meilleure couverture ne garantit pas moins d'infections : à k = 12, `ilp` couvre 100 % de la population mais réduit l'épidémie de 10,2 %, tandis que `betweenness` (95,9 % de couverture) la réduit de 12,9 %. L'optimalité prouvée porte sur l'objectif d'optimisation, pas sur la réduction des infections.
 
-**Précautions.** Les écarts de quelques points entre méthodes (par exemple
-`greedy`, `betweenness` et `ilp_deg` à k = 12) ne permettent pas de les
-classer. Les résultats portent sur un seul graphe et une seule graine, et
-les temps de calcul sont propres à notre machine. Le téléchargement
-automatique du jeu de données n'ayant plus fonctionné (erreur 404), le
-fichier a été téléchargé manuellement depuis SocioPatterns.
+**Précautions.** Les écarts de quelques points entre méthodes (par exemple `greedy`, `betweenness` et `ilp_deg` à k = 12) ne permettent pas de les classer. Les résultats portent sur un seul graphe et une seule graine, et les temps de calcul sont propres à notre machine. Le téléchargement automatique du jeu de données n'ayant plus fonctionné (erreur 404), le fichier a été téléchargé manuellement depuis SocioPatterns.
+
+### 7.2. Résultats sur le réseau hospitalier (protocole final)
+
+Afin de comparer les méthodes de sélection sur le réseau hospitalier SocioPatterns, nous avons réalisé deux expériences : une avec le modèle SIR uniforme et une avec le modèle SIR pondéré.
+
+Le graphe comporte **75 personnes et 1139 arêtes**, avec un seuil `min_contacts = 1`. Les expériences utilisent trois budgets d'immunisation (k = 2, 6 et 10), 200 répétitions SIR par sélection évaluée, 10 tirages pour la méthode aléatoire, une politique d'infection initiale `fixed`, une graine aléatoire de 42 et une limite de résolution ILP de 12 secondes.
+
+Pour le modèle uniforme, le paramètre beta est calibré à partir d'un R0 cible de 3, avec gamma = 0,2. Pour le modèle pondéré, beta est calibré par simulations Monte-Carlo afin d'approcher un taux d'attaque de 75 % sans intervention, avec gamma = 0,2 et 100 simulations par étape de calibration.
+
+Les paramètres complets et les résultats sont disponibles dans `results/examples/hospital_uniform_final/` et `results/examples/hospital_weighted_final/`.
+
+**Résultats du modèle SIR uniforme.**
+
+Le modèle uniforme utilise un beta de 0,01744. Le taux d'attaque moyen sans intervention est de 81,5 %.
+
+| Méthode | k = 2 | k = 6 | k = 10 |
+|---|---:|---:|---:|
+| Random | 78,5 % | 70,1 % | 64,1 % |
+| Degree | 75,2 % | 58,2 % | 41,9 % |
+| Betweenness | 75,2 % | 60,1 % | 44,8 % |
+| PageRank | 75,2 % | 58,2 % | 41,9 % |
+| Closeness | 75,2 % | 58,2 % | 41,9 % |
+| K-core | 74,8 % | 61,3 % | 46,4 % |
+| Strength | 74,8 % | 61,3 % | 46,4 % |
+| Greedy | 75,2 % | 62,1 % | 46,4 % |
+| ILP | 75,2 % | 65,9 % | 63,9 % |
+| ILP_deg | 75,2 % | 60,3 % | 45,2 % |
+| Greedy_edges | 76,8 % | 63,0 % | 46,4 % |
+| ILP_edges | 76,8 % | 63,0 % | 46,4 % |
+
+**Valeurs : taux d'attaque moyen. Une valeur faible correspond à moins de personnes infectées.**
+
+Pour k = 10, les méthodes Degree, PageRank et Closeness obtiennent les taux d'attaque les plus faibles (41,9 %), contre 64,1 % pour la sélection aléatoire. Cela correspond à une réduction relative de 48,6 % par rapport à l'absence d'intervention.
+
+Pour ce budget, l'intervalle de confiance à 95 % de Degree est d'environ [38,7 % ; 45,2 %], contre [61,8 % ; 66,4 %] pour Random. L'écart entre ces méthodes est donc important au regard de l'incertitude estimée.
+
+**Résultats du modèle SIR pondéré.**
+
+La calibration du modèle pondéré a conduit à beta = 0,03162. Le taux d'attaque obtenu pendant la calibration est de 75,5 %, pour une cible de 75 %. Lors de l'évaluation finale, le taux d'attaque moyen sans intervention est de 73,1 %.
+
+| Méthode | k = 2 | k = 6 | k = 10 |
+|---|---:|---:|---:|
+| Random | 70,7 % | 66,5 % | 57,7 % |
+| Degree | 69,0 % | 54,3 % | 38,2 % |
+| Betweenness | 69,0 % | 55,0 % | 40,2 % |
+| PageRank | 69,0 % | 54,3 % | 38,2 % |
+| Closeness | 69,0 % | 54,3 % | 38,2 % |
+| K-core | 68,6 % | 51,2 % | 32,8 % |
+| Strength | 68,6 % | 51,2 % | 32,8 % |
+| Greedy | 69,0 % | 58,1 % | 39,8 % |
+| ILP | 69,0 % | 63,5 % | 60,5 % |
+| ILP_deg | 69,0 % | 58,1 % | 39,5 % |
+| Greedy_edges | 68,3 % | 51,4 % | 32,8 % |
+| ILP_edges | 68,3 % | 51,4 % | 32,8 % |
+
+**Valeurs : taux d'attaque moyen. Une valeur faible correspond à moins de personnes infectées.**
+
+Pour k = 10, K-core, Strength, Greedy_edges et ILP_edges obtiennent les meilleurs taux d'attaque moyens (32,8 %), contre 57,7 % pour la sélection aléatoire. Cela représente une réduction relative de 55,2 % par rapport au scénario sans intervention.
+
+L'intervalle de confiance à 95 % de Strength est d'environ [29,9 % ; 35,6 %], contre [55,3 % ; 60,1 %] pour Random.
+
+**Synthèse des meilleures moyennes observées.**
+
+| Budget | SIR uniforme : plus faible taux d’attaque | SIR pondéré : plus faible taux d’attaque |
+|---|---|---|
+| k = 2 | K-core, Strength : 74,8 % | Greedy_edges, ILP_edges : 68,3 % |
+| k = 6 | Degree, PageRank, Closeness : 58,2 % | K-core, Strength : 51,2 % |
+| k = 10 | Degree, PageRank, Closeness : 41,9 % | K-core, Strength, Greedy_edges, ILP_edges : 32,8 % |
+
+Ce tableau présente les meilleures moyennes observées dans chaque configuration, sans prétendre à un classement statistique définitif.
+
+**Similarités entre les méthodes.**
+
+Plusieurs méthodes présentent des résultats numériques identiques, notamment Degree, PageRank et Closeness pour k = 10, ainsi que K-core, Strength, Greedy_edges et ILP_edges pour ce même budget. Ces égalités sont compatibles avec des sélections identiques, mais seule une comparaison explicite des fichiers de solutions permettrait de le confirmer.
+
+**Influence du budget d'immunisation.**
+
+Dans les deux modèles, l'augmentation du budget de k = 2 à k = 10 s'accompagne d'une diminution du taux d'attaque moyen pour l'ensemble des méthodes étudiées.
+
+Les différences entre les méthodes sont relativement limitées pour k = 2, mais deviennent plus marquées pour les budgets supérieurs.
+
+Par exemple, dans le modèle pondéré, Strength passe d'un taux d'attaque de 68,6 % avec k = 2 à 51,2 % avec k = 6, puis 32,8 % avec k = 10.
+
+**Couverture du réseau et efficacité épidémiologique.**
+
+Les résultats montrent qu'une couverture maximale des voisinages ne garantit pas une réduction maximale des contaminations.
+
+Dans les deux modèles, l'ILP couverture atteint une couverture de 75 personnes avec k = 10. Pourtant, son taux d'attaque reste de 63,9 % en uniforme et de 60,5 % en pondéré.
+
+À titre de comparaison, Greedy et ILP_deg atteignent également une couverture de 75 personnes, mais obtiennent des taux d'attaque plus faibles.
+
+Ce phénomène s'explique notamment par l'existence de plusieurs sélections optimales pour la couverture, qui n'ont pas nécessairement la même efficacité sur la propagation de l'épidémie.
+
+L'optimalité combinatoire doit donc être distinguée de l'efficacité épidémiologique mesurée par le SIR.
+
+**Compromis entre efficacité et temps de calcul.**
+
+Pour k = 10 dans le modèle pondéré, Greedy_edges et ILP_edges obtiennent le même taux d’attaque moyen (32,8 %) et la même couverture (73 personnes), mais leurs temps de sélection affichés sont respectivement de 0,0071 s et 0,0475 s. Sur cette exécution, le glouton est donc environ 6,7 fois plus rapide. À titre de comparaison, Degree demande environ 0,0001 s et Strength 0,0003 s, pour des taux d'attaque moyens respectifs de 38,2 % et 32,8 %.
+
+Ces temps sont très courts et dépendent de la machine et des conditions d'exécution. Une évaluation fiable des performances nécessiterait des mesures répétées ; une comparaison unique ne permet pas d'affirmer qu'un algorithme est toujours plus rapide.
+
+**Comparaison des modèles uniforme et pondéré.**
+
+Le classement des méthodes varie selon le modèle de transmission.
+
+Pour k = 10, Degree, PageRank et Closeness obtiennent les meilleures moyennes dans le modèle uniforme, tandis que K-core, Strength et les deux méthodes d'optimisation des contacts pondérés obtiennent les meilleures moyennes dans le modèle pondéré.
+
+Ces observations suggèrent que la prise en compte de la durée cumulée des contacts peut modifier l'intérêt des stratégies de sélection.
+
+Cependant, les deux modèles présentent des taux d'attaque différents sans intervention (81,5 % en uniforme et 73,1 % en pondéré). La comparaison directe des taux d'attaque entre modèles doit donc rester prudente. Les réductions relatives sont notamment calculées par rapport à la référence propre à chaque modèle.
+
+**Particularité de la méthode aléatoire.**
+
+La méthode Random utilise 10 tirages de sélections différentes : ses résultats représentent une comparaison de référence qui agrège plusieurs choix possibles de personnes. Les autres méthodes peuvent produire une sélection unique pour chaque budget. Cette différence de protocole doit être prise en compte dans l'interprétation des distributions et des temps de sélection.
+
+**Dispersion et fiabilité des résultats.**
+
+Les expériences reposent sur des simulations stochastiques. Les moyennes sont donc accompagnées d'un écart-type et d'un intervalle de confiance à 95 %, enregistrés dans les fichiers `results.csv`.
+
+Pour k = 10, les intervalles de confiance des méthodes les plus efficaces et de la sélection aléatoire sont nettement séparés. En revanche, les intervalles de plusieurs méthodes performantes se chevauchent, ce qui ne permet pas de les départager sur cette seule base.
+
+Une comparaison statistique directe des différences entre méthodes, idéalement avec des simulations appariées, serait nécessaire pour établir plus précisément leur classement.
+
+Par ailleurs, les résultats concernent un seul réseau hospitalier agrégé, un jeu de paramètres par modèle et des graines aléatoires contrôlées. Leur généralisation à d'autres réseaux ou contextes médicaux n'est pas démontrée.
+
+**Vérification et reproductibilité.**
+
+Les deux expériences ont été soumises au vérificateur indépendant avec l'option `--strict`.
+
+Les 36 solutions du modèle uniforme et les 36 solutions du modèle pondéré ont été déclarées valides, soit **72 solutions valides sur 72**.
+
+Cette vérification confirme le respect des contraintes et des métriques contrôlées par le programme, mais ne prouve pas que toutes les solutions sont optimales.
+
+Les commandes de reproduction des expériences principales sont :
+
+```bash
+python -m src.run_experiments --input data/raw/hospital.dat.gz --name hospital_uniform_final --k 2 6 10 --runs 200 --random-draws 10 --r0 3 --seed-policy fixed --seed 42 --ilp-time-limit 12
+```
+
+```bash
+python -m src.run_experiments --input data/raw/hospital.dat.gz --name hospital_weighted_final --transmission weighted --target-attack 0.75 --calibration-runs 100 --k 2 6 10 --runs 200 --random-draws 10 --seed-policy fixed --seed 42 --ilp-time-limit 12
+```
+
+Ces commandes supposent que les dépendances sont installées et que les données hospitalières ont préalablement été téléchargées.
+
+**Bilan.**
+
+Les expériences montrent que l'exploitation de la structure du réseau peut permettre de réduire davantage la propagation simulée qu'une sélection aléatoire. L'efficacité des méthodes dépend toutefois du budget d'immunisation et du modèle de transmission utilisé.
+
+Elles confirment également que la maximisation d'un objectif combinatoire, comme la couverture des voisinages, ne garantit pas la meilleure performance épidémiologique.
+
+Ces résultats constituent une évaluation numérique des stratégies d'immunisation dans un cadre pédagogique et ne doivent pas être interprétés comme des recommandations cliniques.
 
 ## 8. Analyse des limites, des échecs et des risques
 
@@ -701,7 +875,6 @@ des bibliothèques utilisées.
 Les dépendances et les paramètres expérimentaux sont documentés
 afin de faciliter la reproduction des expériences.
 
-
 ## 9. Extensions possibles
 
 Plusieurs extensions pourraient être envisagées pour améliorer
@@ -723,3 +896,17 @@ le projet :
 Ces extensions constituent des perspectives d'amélioration
 et ne sont pas présentées comme des fonctionnalités réalisées
 dans le MVP actuel.
+
+## 10. Conclusion générale
+
+Ce projet a permis de comparer différentes méthodes de sélection de personnes à immuniser sur des réseaux de contacts, en associant des techniques d'optimisation combinatoire à des simulations épidémiologiques SIR.
+
+Les expériences réalisées sur les réseaux hospitalier et scolaire montrent que la structure du graphe peut être exploitée pour identifier des stratégies d'intervention plus efficaces qu'une sélection aléatoire. Les résultats dépendent toutefois du budget d'immunisation, des caractéristiques du réseau et du modèle de transmission utilisé.
+
+Les simulations hospitalières montrent notamment que les méthodes les plus performantes peuvent varier entre les modèles SIR uniforme et pondéré. Elles mettent également en évidence qu'une couverture maximale des voisinages ne garantit pas nécessairement la plus forte réduction du taux d'attaque.
+
+La comparaison des méthodes gloutonnes et ILP souligne également l'importance du compromis entre qualité des solutions et temps de calcul. Les méthodes exactes permettent de rechercher et, sous certaines conditions, de prouver l'optimalité d'une solution pour un objectif combinatoire, tandis que les méthodes gloutonnes peuvent produire rapidement des solutions de bonne qualité.
+
+Enfin, les vérifications fonctionnelles et les contrôles indépendants renforcent la confiance dans le fonctionnement du programme. Les résultats restent néanmoins limités par les hypothèses du modèle, notamment l'immunisation parfaite, l'agrégation temporelle des contacts et l'utilisation de probabilités de transmission simplifiées.
+
+Ce travail constitue ainsi une démonstration de l'intérêt des méthodes d'optimisation sur graphes pour étudier des stratégies d'intervention, sans prétendre fournir un outil directement applicable à la prise de décision médicale.
