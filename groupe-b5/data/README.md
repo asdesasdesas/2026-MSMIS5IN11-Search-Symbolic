@@ -1,42 +1,64 @@
-# Provenance, récupération et licence des données
 
-**Les jeux de données téléchargés ne doivent pas être inclus dans le dépôt Git ou l'archive de remise.**
-Le dossier `data/raw/` est exclu par `.gitignore`; `data/processed/` contient uniquement des graphes JSON générés.
-Les CSV présents dans `results/examples/` sont des **statistiques agrégées**, pas des fichiers de contacts.
+# Données utilisées dans le projet B5
 
-| Jeu | Origine publique | Format |
-| --- | --- | --- |
-| Hôpital | [SocioPatterns - Hospital ward dynamic contact network](http://www.sociopatterns.org/datasets/hospital-ward-dynamic-contact-network/) | `hospital.dat.gz` (`t i j statut_i statut_j`) |
-| École primaire | [SocioPatterns - Primary school](http://www.sociopatterns.org/datasets/primary-school-temporal-network-data/) | `primaryschool.csv.gz` (`t i j classe_i classe_j`) |
-| Lycée | [SocioPatterns - High school](http://www.sociopatterns.org/datasets/high-school-dynamic-contact-networks/) | miroir Netzschleuder ZIP |
-| Synthétique | `src/data.py::synthetic_graph` | génération Python, aucune donnée externe |
+## 1. Origine des données
 
-Les identifiants sont des pseudonymes publics, mais il faut conserver les restrictions de redistribution.
-Licence des jeux SocioPatterns indiquée dans la documentation d'origine : **CC BY-NC-SA 3.0** ;
-vérifier la licence affichée pour la version exacte téléchargée avant toute redistribution.
+Nous utilisons des jeux de données publics provenant du projet [SocioPatterns](http://www.sociopatterns.org/datasets/), qui étudie les interactions entre individus à l'aide de capteurs de proximité.
 
-## Télécharger sans commiter
+Nous avons utilisé deux réseaux de contacts :
+- Un réseau hospitalier, constitué de 75 personnes.
+- Un réseau d'école primaire, constitué de 242 personnes.
+
+Ces données nous permettent d'étudier différentes stratégies de sélection de personnes à immuniser sur des réseaux réels.
+
+## 2. Construction des graphes
+
+Les contacts sont enregistrés par intervalles de 20 secondes.
+
+Notre programme `src/data.py` transforme ces données en graphes non orientés et pondérés :
+
+- Un nœud représente une personne.
+- Une arête représente un contact entre deux personnes.
+- Le poids d'une arête correspond au nombre d'intervalles de contact observés entre ces personnes.
+
+Les contacts répétés entre deux personnes sont regroupés dans une même arête.
+
+Nous utilisons principalement `min_contacts = 1`, ce qui permet de conserver tous les contacts enregistrés.
+
+Après ce traitement, les graphes utilisés comportent :
+
+| Jeu de données | Nœuds | Arêtes |
+|---|---:|---:|
+| Hôpital | 75 | 1 139 |
+| École primaire | 242 | 8 317 |
+
+## 3. Téléchargement des données
+
+Depuis le dossier `groupe-b5`, exécuter :
 
 ```bash
 python data/download_data.py hospital_raw
 python data/download_data.py primary_school_raw
-# Alternative hospitalier si l'URL brute échoue :
-python data/download_data.py hospital
 ```
 
-Si l'hébergeur change une URL, le script affiche le lien et la page source de provenance :
-téléchargez manuellement le `.gz` d'origine et placez-le sous le nom attendu dans `data/raw/`.
-Les téléchargements ne sont **jamais nécessaires** pour la démo synthétique.
+Les fichiers attendus sont :
 
-## Construction des graphes
+- `data/raw/hospital.dat.gz`
+- `data/raw/primaryschool.csv.gz`
 
-Une ligne représente une observation d'un contact face-à-face de 20 s. L'agrégation produit un graphe statique non orienté :
-une personne = un nœud, chaque paire = une arête de poids égal au nombre de tranches de 20 s observées.
-Les paramètres `--min-contacts` filtrent les arêtes, sans supprimer les personnes devenues isolées.
-Attention : l'agrégation fait disparaître l'ordre temporel des contacts (limite importante).
+Si le téléchargement automatique échoue, les archives peuvent être récupérées manuellement depuis les pages SocioPatterns correspondantes.
 
-## Références de jeux
+## 4. Organisation du dossier
 
-- Vanhems et al. (2013), *Estimating Potential Infection Transmission Routes in Hospital Wards Using Wearable Proximity Sensors*, PLoS ONE 8(9), e73970.
-- Stehlé et al. (2011), *High-Resolution Measurements of Face-to-Face Contact Patterns in a Primary School*, PLoS ONE 6(8), e23176.
-- Fournet et al. (2014), *Contact Patterns among High School Students*, PLoS ONE 9(9), e107878.
+- `download_data.py` : script de téléchargement des jeux de données.
+- `raw/` : données originales téléchargées.
+- `processed/` : graphes générés lors des expériences.
+- `README.md` : documentation des données.
+
+## 5. Données et reproductibilité
+
+Les fichiers de données téléchargées et les graphes générés ne sont pas versionnés dans notre dépôt GitHub.
+
+Nous conservons les scripts permettant de télécharger les données, de construire les graphes et de reproduire les expériences.
+
+L'agrégation en graphe statique entraîne une perte de l'ordre chronologique des contacts. Cette limite est prise en compte dans notre analyse méthodologique.

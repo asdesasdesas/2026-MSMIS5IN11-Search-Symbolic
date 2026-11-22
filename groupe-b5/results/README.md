@@ -1,17 +1,91 @@
-# Résultats
 
-- `results/examples/` : **résultats exploratoires mesurés**, issus des jeux réels SocioPatterns disponibles dans les ZIP initiaux ; seuls les résumés CSV/JSON et figures PNG sont conservés.
-- `results/<nom>/` : nouvelles expériences générées localement, ignorées par Git.
-- `data/processed/<nom>_graph.json` : graphe généré localement, ignoré par Git.
+# Résultats expérimentaux du projet B5
 
-Chaque dossier de résultats contient `results.csv`, `config.json`, des figures et `solutions/*.json`.
-Le graphe JSON est reconstruit depuis le jeu d'origine pour utiliser le vérificateur indépendant :
+## 1. Présentation
 
-```bash
-python -m src.verifier --graph data/processed/hospital_uniform_graph.json --solutions results/hospital_uniform/solutions --strict
-```
+Ce dossier regroupe les résultats de nos expériences d'optimisation et de simulation épidémiologique SIR.
 
-Les intervalles `attack_ci95_halfwidth` sont approximatifs (1,96 × écart-type / racine du nombre de simulations) ;
-ils ne représentent pas des intervalles pour la différence entre méthodes et ne remplacent pas une analyse statistique complète.
-Les comparaisons réelles utilisent le même `seed` et les mêmes budgets. Les résultats changent avec le modèle SIR.
-Les temps sont dépendants de la machine et ne doivent pas être comparés à des chronométrages réalisés ailleurs.
+Nous avons comparé différentes méthodes de sélection de personnes à immuniser, notamment les méthodes aléatoires, les centralités, les algorithmes gloutons et les formulations ILP.
+
+Les principales mesures étudiées sont :
+- La couverture du réseau.
+- Le poids total des contacts coupés.
+- Le temps de calcul.
+- Le taux d'attaque moyen.
+- La probabilité d'épidémie majeure.
+- La réduction de la propagation par rapport à l'absence d'intervention.
+
+## 2. Organisation des résultats
+
+Le dossier `examples/` contient plusieurs expériences réalisées sur les données SocioPatterns.
+
+| Dossier | Description |
+|---|---|
+| `hospital_uniform/` | Premières expériences hospitalières avec le SIR uniforme |
+| `hospital_weighted/` | Premières expériences hospitalières avec le SIR pondéré |
+| `hospital_uniform_final/` | Expériences finales avec le SIR uniforme |
+| `hospital_weighted_final/` | Expériences finales avec le SIR pondéré |
+| `primary_uniform/` | Expériences sur le réseau de l'école primaire |
+
+Les dossiers `hospital_uniform_final/` et `hospital_weighted_final/` contiennent les résultats hospitaliers retenus pour notre analyse comparative finale.
+
+## 3. Contenu des dossiers d'expériences
+
+Chaque dossier d'exemples contient :
+
+- `results.csv` : résultats numériques des différentes méthodes et des budgets d'immunisation.
+- `config.json` : paramètres utilisés pour réaliser l'expérience.
+- `attack_rate_vs_k.png` : évolution du taux d'attaque selon le budget.
+- `p_major_vs_k.png` : probabilité d'épidémie majeure selon le budget.
+- `objective_vs_attack.png` : relation entre les objectifs d'optimisation et le taux d'attaque.
+- `time_vs_k.png` : temps de calcul des méthodes selon le budget.
+- `quality_vs_time.png` : compromis entre la qualité des solutions et le temps de calcul.
+
+## 4. Expériences hospitalières finales
+
+Les deux expériences finales utilisent :
+
+- 75 personnes et 1 139 arêtes.
+- Trois budgets d'immunisation : k = 2, 6 et 10.
+- 200 simulations SIR par sélection évaluée.
+- 10 tirages de sélections pour la méthode aléatoire.
+- Une graine aléatoire fixée à 42.
+- Une probabilité de guérison gamma = 0,2.
+
+### Modèle SIR uniforme
+
+Le paramètre beta est déterminé à partir d'un R0 cible de 3.
+
+Le taux d'attaque moyen sans intervention est de 81,5 %.
+
+Pour k = 10, les méthodes Degree, PageRank et Closeness obtiennent les taux d'attaque moyens les plus faibles : 41,9 %.
+
+### Modèle SIR pondéré
+
+La transmission dépend du poids des contacts. Le paramètre beta est calibré pour approcher un taux d'attaque cible de 75 % sans intervention.
+
+Le taux d'attaque moyen de référence obtenu dans l'évaluation finale est de 73,1 %.
+
+Pour k = 10, K-core, Strength, Greedy_edges et ILP_edges obtiennent les taux d'attaque moyens les plus faibles : 32,8 %.
+
+## 5. Interprétation des résultats
+
+Nos expériences montrent que l'augmentation du budget d'immunisation réduit généralement la propagation simulée.
+
+Les méthodes les plus efficaces dépendent cependant du modèle de transmission utilisé.
+
+Nous observons également qu'une méthode optimale pour la couverture du réseau n'est pas nécessairement celle qui réduit le plus les infections.
+
+Ces résultats concernent des simulations pédagogiques reposant sur plusieurs hypothèses simplificatrices, notamment une immunisation parfaite et immédiate.
+
+## 6. Vérification et reproductibilité
+
+Les solutions des deux expériences hospitalières finales ont été contrôlées avec notre vérificateur indépendant.
+
+Au total, 72 solutions sur 72 ont été déclarées valides.
+
+Les scripts de reproduction et les commandes d'exécution sont décrits dans le README principal du projet.
+
+Les analyses détaillées, les intervalles de confiance et les limites des expériences sont présentés dans :
+
+`docs/ANALYSE_METHODOLOGIQUE.md`

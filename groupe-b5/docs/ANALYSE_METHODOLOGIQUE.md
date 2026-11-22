@@ -321,6 +321,7 @@ graphe par rapport au nombre maximal d'arêtes possibles.
 
 Pour un graphe non orienté sans boucle, elle est calculée par :
 
+
 $$
 D = \frac{2E}{N(N-1)}
 $$
