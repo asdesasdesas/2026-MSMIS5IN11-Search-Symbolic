@@ -1,13 +1,22 @@
-"""Vérificateur indépendant des solutions.
+"""Vérificateur INDÉPENDANT des solutions.
+
+Indépendant = il n'importe ni networkx, ni selection.py, ni sir.py : il relit le graphe
+(JSON) et la solution (JSON) et recalcule tout avec sa propre implémentation, en
+bibliothèque standard uniquement. Comme ça, un bug dans le code de sélection ne peut
+pas se cacher dans le vérificateur.
 
 Ce qu'il contrôle pour chaque solution :
-  1. la sélection est une liste de k personnes distinctes qui existent dans le graphe
-  2. le nombre de personne protégé est recalculé du point de vue de chaque personne
-  3. si la solution annonce un "cut_weight" (poids des contacts coupés), il est recalculé aussi
+  1. la sélection est une liste de k personnes DISTINCTES qui existent dans le graphe ;
+  2. la couverture annoncée est exacte (recalculée du point de vue de chaque personne) ;
+  3. si la solution annonce un "cut_weight" (poids des contacts coupés), il est recalculé aussi ;
   4. si le graphe est assez petit, un test par force brute vérifie, pour l'objectif annoncé
      ("coverage" par défaut, ou "cut_weight" pour les méthodes sur les contacts), que
-        - aucune sélection ne fait mieux que celle annoncée "optimale" (cas de l'ILP)
-        - le glouton respecte sa garantie (>= 1 - 1/e de l'optimum)
+        - aucune sélection ne fait mieux que celle annoncée "optimale" (cas de l'ILP),
+        - le glouton respecte sa garantie (>= 1 - 1/e de l'optimum).
+
+Utilisation :
+    python -m src.verifier --graph data/processed/hospital_graph.json \
+                           --solutions results/hospital/solutions
 """
 from __future__ import annotations
 
@@ -19,10 +28,9 @@ from itertools import combinations
 from pathlib import Path
 
 
-
 # Lecture du graphe (sans networkx)
-
-def load_graph(path): #Renvoie {personne: ensemble de voisins} à partir du JSON du graphe
+def load_graph(path):
+    """Renvoie {personne: ensemble de voisins} à partir du JSON du graphe."""
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     # un ensemble vide de voisins par personne, y compris les personnes isolées
     adj = {int(v): set() for v in data["nodes"]}
@@ -56,9 +64,7 @@ def brute_force_best_cut(adj, edges, k):
     return max(cut_weight_of(edges, c) for c in combinations(adj, k))
 
 
-# ----------------------------------------------------------------------------
 # Objectif "couverture"
-# ----------------------------------------------------------------------------
 def covered_count(adj, selected) -> int:
     """Point de vue de chaque personne : est-elle choisie, ou a-t-elle un voisin choisi ?"""
     chosen = set(selected)
@@ -73,9 +79,7 @@ def brute_force_best(adj, k) -> int:
     return max(covered_count(adj, c) for c in combinations(adj, k))
 
 
-# ----------------------------------------------------------------------------
 # Vérification d'une solution
-# ----------------------------------------------------------------------------
 def check_solution(adj, solution: dict, max_combinations: int = 200_000, edges=None, strict: bool = False) -> list:
     """Renvoie la liste des erreurs trouvées (liste vide = solution valide).
 

@@ -52,44 +52,46 @@ def coverage(G: nx.Graph, selected) -> int:
     # Nombre de personnes couvertes par une sélection (= taille de N[S]).
     covered = set()  # personnes déjà couvertes, sans doublon grâce à l'ensemble
     for v in selected:
-        # |= fait l'union : chaque personne n'est comptée qu'une seule fois, même si plusieurs nœuds sélectionnés la couvrent
+        # |= fait l'union : chaque personne n'est comptée qu'une seule fois,
+        # même si plusieurs nœuds sélectionnés la couvrent
         covered |= closed_neighborhood(G, v)
     return len(covered)
 
 
 def _check_k(G, k):
     # Garde-fou commun à toutes les méthodes : on ne peut pas choisir
-    # un nombre négatif de personnes, ni plus de personnes qu'il n'y a de nœuds
+    # un nombre négatif de personnes, ni plus de personnes qu'il n'y a de nœuds.
     if not 0 <= k <= G.number_of_nodes():
         raise ValueError(f"k doit être entre 0 et {G.number_of_nodes()} (reçu : {k})")
-
 
 
 # Heuristiques simples (classements par score)
 def select_random(G: nx.Graph, k: int, seed: int = 0) -> list:
     # Référence minimale : k nœuds tirés uniformément au hasard.
     _check_k(G, k)
-    # sorted() fixe l'ordre des nœuds : avec la même graine, on obtient toujours le même tirage (reproductibilité)
-    # sample() tire sans remise.
+    # sorted(...) fixe l'ordre des nœuds : avec la même graine, on obtient toujours
+    # le même tirage (reproductibilité). sample() tire sans remise.
     return random.Random(seed).sample(sorted(G.nodes), k)
 
 
 def _top_k(scores: dict, k: int) -> list:
     # Renvoie les k nœuds de plus haut score.
     # Clé de tri : (-score, identifiant)
-    # le signe moins inverse l'ordre sur le score => décroissant
-    # l'identifiant départage les égalités, donc résultat déterministe
+    #   - le signe moins inverse l'ordre sur le score => décroissant
+    #   - l'identifiant départage les égalités => résultat déterministe
+    # kv[0] = nœud, kv[1] = son score.
     return [v for v, _ in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:k]]
 
 
 def select_degree(G: nx.Graph, k: int) -> list:
-    # Les k nœuds ayant le plus de voisins distincts (degré non pondéré)
+    # Les k nœuds ayant le plus de voisins distincts (degré non pondéré).
     _check_k(G, k)
     return _top_k(dict(G.degree()), k)
 
 
 def select_betweenness(G: nx.Graph, k: int) -> list:
     # Les k nœuds par lesquels passent le plus de plus courts chemins
+    # (centralité d'intermédiarité) : les "ponts" du réseau.
     _check_k(G, k)
     return _top_k(nx.betweenness_centrality(G), k)
 
@@ -97,12 +99,13 @@ def select_betweenness(G: nx.Graph, k: int) -> list:
 def select_pagerank(G: nx.Graph, k: int) -> list:
     # Les k nœuds au meilleur PageRank (importance d'un nœud selon l'importance de ses voisins).
     _check_k(G, k)
-    # weight=None, on ignore la durée des contacts, chaque arête compte pour 1
+    # weight=None : on ignore la durée des contacts, chaque arête compte pour 1
     return _top_k(nx.pagerank(G, weight=None), k)
 
 
 def select_closeness(G: nx.Graph, k: int) -> list:
-    # Les k nœuds les plus "centraux" sont ceux dont la distance moyenne vers tous les autres est la plus faible
+    # Les k nœuds les plus "centraux" : ceux dont la distance moyenne
+    # (en plus court chemin) vers tous les autres est la plus faible.
     _check_k(G, k)
     return _top_k(nx.closeness_centrality(G), k)
 
@@ -110,7 +113,6 @@ def select_closeness(G: nx.Graph, k: int) -> list:
 def select_kcore(G: nx.Graph, k: int) -> list:
     # Les k nœuds du "cœur" le plus dense du graphe, départagés par la force.
     _check_k(G, k)
-    
     if G.number_of_nodes() == 0:
         return []
     # core_number : pour chaque nœud, le plus grand c tel qu'il appartient
@@ -125,9 +127,7 @@ def select_kcore(G: nx.Graph, k: int) -> list:
     return _top_k({v: core[v] + strength[v] / scale for v in G}, k)
 
 
-# ----------------------------------------------------------------------------
 # Glouton sur la couverture
-# ----------------------------------------------------------------------------
 def select_greedy_coverage(G: nx.Graph, k: int) -> list:
     # À chaque tour, on ajoute le nœud qui couvre le plus de personnes pas encore couvertes.
     _check_k(G, k)
@@ -153,9 +153,7 @@ def select_greedy_coverage(G: nx.Graph, k: int) -> list:
     return selected
 
 
-# ----------------------------------------------------------------------------
 # ILP exact sur la couverture
-# ----------------------------------------------------------------------------
 def _ilp_model(G: nx.Graph, k: int):
     # Construit les contraintes du modèle ILP de couverture.
     # Vecteur de variables, de taille 2n : [x_0..x_{n-1}, y_0..y_{n-1}]
@@ -223,7 +221,7 @@ def solve_ilp_coverage(G: nx.Graph, k: int, time_limit: float = 60.0, tie_break=
         return milp(c, constraints=constraints, integrality=integrality, bounds=bounds,
                     options={"time_limit": time_limit})
 
-    # ---- étape 1 : couverture maximale ----
+    # étape 1 : couverture maximale
     # Coût : 0 sur les x, -1 sur les y  =>  minimiser -somme(y_j) = maximiser la couverture
     res = run(np.concatenate([np.zeros(n), -np.ones(n)]), [cover_constraint, budget_constraint])
     if res.x is None:
@@ -252,7 +250,7 @@ def solve_ilp_coverage(G: nx.Graph, k: int, time_limit: float = 60.0, tie_break=
         "mip_gap": getattr(res, "mip_gap", None),  # écart à la meilleure borne connue (None si absent)
     }
 
-    # ---- étape 2 (optionnelle) : départager les sélections de même couverture ----
+    # étape 2 (optionnelle) : départager les sélections de même couverture
     # Inutile si l'étape 1 n'est pas prouvée optimale : le départage n'aurait pas de sens.
     if tie_break == "degree" and out["optimal"] and k > 0:
         best = out["objective"]  # couverture maximale C* obtenue à l'étape 1
@@ -283,9 +281,7 @@ def select_ilp_degree(G: nx.Graph, k: int, time_limit: float = 60.0) -> list:
     return solve_ilp_coverage(G, k, time_limit, tie_break="degree")["selected"]
 
 
-# ----------------------------------------------------------------------------
 # EXTENSION : couper le plus de contacts (arêtes), pondérés par leur durée
-# ----------------------------------------------------------------------------
 def _edge_weight(data: dict, weighted: bool) -> float:
     # Poids d'une arête : sa durée si weighted=True (1 par défaut si absente),
     # sinon 1 pour toutes (on compte alors simplement le nombre de contacts).
@@ -404,12 +400,10 @@ def select_ilp_edges(G: nx.Graph, k: int, time_limit: float = 60.0) -> list:
     return solve_ilp_edges(G, k, time_limit)["selected"]
 
 
-# ----------------------------------------------------------------------------
 # Registre des méthodes (utilisé par run_experiments.py)
-# ----------------------------------------------------------------------------
 # Associe le nom d'une méthode (chaîne) à sa fonction : run_experiments.py
 # peut ainsi appeler la bonne sélection à partir d'un simple nom.
-# Note : select_random n'y figure pas (elle prend en plus une graine).
+# select_random n'y figure pas (elle prend en plus une graine)
 SELECTORS = {
     "degree": select_degree,
     "betweenness": select_betweenness,
