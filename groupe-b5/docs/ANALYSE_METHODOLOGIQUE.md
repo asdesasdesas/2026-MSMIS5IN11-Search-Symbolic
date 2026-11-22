@@ -590,6 +590,32 @@ L'augmentation du nombre de simulations et l'étude de la
 variabilité des résultats permettent d'améliorer la robustesse
 des comparaisons.
 
+### 7.1. Résultats sur l'école primaire (protocole final)
+
+Expérience `primary_uniform_final` : 242 personnes, 8317 arêtes, modèle
+uniforme (R0 = 3, gamma = 0,2), politique `fixed`, graine 42,
+200 réplicats, limite ILP de 8 s, k = 5 et k = 12. Sans intervention,
+le taux d'attaque moyen est de 0,832.
+
+**Qualité contre temps.** À k = 12, le glouton atteint la même couverture
+que l'ILP (100 %) en 0,11 s contre 0,23 s. À k = 5, l'ILP trouve une
+meilleure couverture (97,5 % contre 95,5 %), prouvée optimale, mais en
+7,9 s contre 0,017 s. Pour l'objectif des contacts coupés, `greedy_edges`
+et `ilp_edges` donnent exactement les mêmes valeurs aux deux budgets,
+alors que l'ILP est nettement plus lent (6,1 s contre 0,34 s à k = 12).
+
+**Objectif et épidémie.** Une meilleure couverture ne garantit pas moins
+d'infections : à k = 12, `ilp` couvre 100 % de la population mais réduit
+l'épidémie de 10,2 %, tandis que `betweenness` (95,9 % de couverture)
+la réduit de 12,9 %. L'optimalité prouvée porte sur l'objectif
+d'optimisation, pas sur la réduction des infections.
+
+**Précautions.** Les écarts de quelques points entre méthodes (par exemple
+`greedy`, `betweenness` et `ilp_deg` à k = 12) ne permettent pas de les
+classer. Les résultats portent sur un seul graphe et une seule graine, et
+les temps de calcul sont propres à notre machine. Le téléchargement
+automatique du jeu de données n'ayant plus fonctionné (erreur 404), le
+fichier a été téléchargé manuellement depuis SocioPatterns.
 
 ## 8. Analyse des limites, des échecs et des risques
 
