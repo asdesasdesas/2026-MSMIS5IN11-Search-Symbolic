@@ -1,0 +1,7 @@
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com/patient/> .
+
+ex:Patient1 a fhir:Patient ;
+    fhir:Patient.birthDate [ fhir:value "1990-01-01"^^xsd:date ] ;
+    fhir:Patient.deceasedDateTime [ fhir:value "1985-05-15"^^xsd:date ] .

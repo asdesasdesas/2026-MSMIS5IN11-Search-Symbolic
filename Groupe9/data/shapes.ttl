@@ -1,0 +1,22 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com/patient/> .
+
+ex:PatientDeathShape a sh:NodeShape ;
+    sh:targetClass fhir:Patient ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "ERREUR CLINIQUE : La date de décès est antérieure à la date de naissance." ;
+        sh:select '''
+            PREFIX fhir: <http://hl7.org/fhir/>
+            SELECT $this ?birth ?death
+            WHERE {
+                $this fhir:Patient.birthDate ?bNode .
+                ?bNode fhir:value ?birth .
+                $this fhir:Patient.deceasedDateTime ?dNode .
+                ?dNode fhir:value ?death .
+                FILTER (?death < ?birth)
+            }
+        ''' ;
+    ] .
