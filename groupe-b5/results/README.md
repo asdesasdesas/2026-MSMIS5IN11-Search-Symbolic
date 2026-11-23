@@ -31,7 +31,7 @@ Les dossiers `hospital_uniform_final/` et `hospital_weighted_final/` contiennent
 
 ## 3. Contenu des dossiers d'expériences
 
-Chaque dossier d'exemples contient :
+Chaque dossier d'exemples contient notamment :
 
 - `results.csv` : résultats numériques des différentes méthodes et des budgets d'immunisation.
 - `config.json` : paramètres utilisés pour réaliser l'expérience.
@@ -56,19 +56,46 @@ Les deux expériences finales utilisent :
 
 Le paramètre beta est déterminé à partir d'un R0 cible de 3.
 
-Le taux d'attaque moyen sans intervention est de 81,5 %.
+Le taux d'attaque moyen sans intervention est de **81,5 %**.
 
-Pour k = 10, les méthodes Degree, PageRank et Closeness obtiennent les taux d'attaque moyens les plus faibles : 41,9 %.
+Pour k = 10, les méthodes Degree, PageRank et Closeness obtiennent les taux d'attaque moyens les plus faibles : **41,9 %**.
 
 ### Modèle SIR pondéré
 
 La transmission dépend du poids des contacts. Le paramètre beta est calibré pour approcher un taux d'attaque cible de 75 % sans intervention.
 
-Le taux d'attaque moyen de référence obtenu dans l'évaluation finale est de 73,1 %.
+Le taux d'attaque moyen de référence obtenu dans l'évaluation finale est de **73,1 %**.
 
-Pour k = 10, K-core, Strength, Greedy_edges et ILP_edges obtiennent les taux d'attaque moyens les plus faibles : 32,8 %.
+Pour k = 10, K-core, Strength, Greedy_edges et ILP_edges obtiennent les taux d'attaque moyens les plus faibles : **32,8 %**.
 
-## 5. Interprétation des résultats
+## 5. Expérience sur le réseau de l'école primaire
+
+Nous avons également réalisé une expérience sur le réseau de l'école primaire, composé de **242 personnes et de 8 317 arêtes**.
+
+Cette expérience utilise le modèle SIR uniforme avec :
+
+- Deux budgets d'immunisation : k = 5 et k = 12.
+- 200 simulations SIR par sélection évaluée.
+- 10 tirages de sélections pour la méthode aléatoire.
+- Une graine aléatoire fixée à 42.
+- Un R0 cible de 3.
+- Une probabilité de guérison gamma = 0,2.
+
+Le taux d'attaque moyen sans intervention est de **83,2 %**.
+
+Pour k = 12, plusieurs méthodes atteignent une couverture totale du réseau, mais leurs performances épidémiologiques diffèrent :
+
+| Méthode | Couverture | Réduction du taux d'attaque |
+|---|---:|---:|
+| Greedy | 242 / 242 | 12,4 % |
+| ILP | 242 / 242 | 10,2 % |
+| ILP_deg | 242 / 242 | 14,0 % |
+
+La méthode ILP_deg obtient la réduction moyenne la plus importante parmi les méthodes évaluées pour k = 12.
+
+Ces résultats confirment qu'une couverture maximale du réseau ne garantit pas nécessairement la réduction la plus importante des infections.
+
+## 6. Interprétation des résultats
 
 Nos expériences montrent que l'augmentation du budget d'immunisation réduit généralement la propagation simulée.
 
@@ -78,11 +105,15 @@ Nous observons également qu'une méthode optimale pour la couverture du réseau
 
 Ces résultats concernent des simulations pédagogiques reposant sur plusieurs hypothèses simplificatrices, notamment une immunisation parfaite et immédiate.
 
-## 6. Vérification et reproductibilité
+## 7. Vérification et reproductibilité
 
-Les solutions des deux expériences hospitalières finales ont été contrôlées avec notre vérificateur indépendant.
+Les solutions des deux expériences hospitalières finales et de l'expérience sur l'école primaire ont été contrôlées avec notre vérificateur indépendant.
 
-Au total, 72 solutions sur 72 ont été déclarées valides.
+Au total, **96 solutions sur 96 ont été déclarées valides** :
+
+- 36 solutions pour l'hôpital avec le SIR uniforme.
+- 36 solutions pour l'hôpital avec le SIR pondéré.
+- 24 solutions pour l'école primaire avec le SIR uniforme.
 
 Les scripts de reproduction et les commandes d'exécution sont décrits dans le README principal du projet.
 
