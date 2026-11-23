@@ -217,13 +217,16 @@ Notre vérificateur contrôle la **faisabilité** des sélections et la cohéren
 
 Nous avons téléchargé et utilisé les données SocioPatterns en local, sans les ajouter au dépôt.
 
-Les fichiers `config.json`, `results.csv` et les cinq graphiques PNG des scénarios hospitaliers finaux sont conservés dans :
+Les résultats des trois expériences finales sont conservés dans les dossiers suivants :
+
 - `results/examples/hospital_uniform_final/`
 - `results/examples/hospital_weighted_final/`
+- `results/examples/primary_uniform_final/`
 
-Nous avons également réalisé une expérience finale sur l'école primaire. Les dernières exécutions locales ont été enregistrées dans les dossiers `hospital_uniform_maj/`, `hospital_weighted_maj/` et `primary_uniform_maj/`, afin de conserver les expériences précédentes.
+Chaque dossier contient les résultats numériques, les paramètres de simulation, les graphiques et les solutions des méthodes testées.
 
 Le détail des analyses, des intervalles de confiance et des limites se trouve dans [`docs/ANALYSE_METHODOLOGIQUE.md`](docs/ANALYSE_METHODOLOGIQUE.md).
+
 
 | Jeu / scénario | Personnes / arêtes | Répétitions SIR | Budgets k |
 |---|---|---|---|

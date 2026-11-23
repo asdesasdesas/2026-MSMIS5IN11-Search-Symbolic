@@ -17,17 +17,19 @@ Les principales mesures étudiées sont :
 
 ## 2. Organisation des résultats
 
-Le dossier `examples/` contient plusieurs expériences réalisées sur les données SocioPatterns.
+
+## 2. Organisation des résultats
+
+Le dossier `examples/` contient les trois expériences finales réalisées sur les données SocioPatterns.
 
 | Dossier | Description |
 |---|---|
-| `hospital_uniform/` | Premières expériences hospitalières avec le SIR uniforme |
-| `hospital_weighted/` | Premières expériences hospitalières avec le SIR pondéré |
-| `hospital_uniform_final/` | Expériences finales avec le SIR uniforme |
-| `hospital_weighted_final/` | Expériences finales avec le SIR pondéré |
-| `primary_uniform/` | Expériences sur le réseau de l'école primaire |
+| `hospital_uniform_final/` | Expérience finale sur l'hôpital avec le SIR uniforme |
+| `hospital_weighted_final/` | Expérience finale sur l'hôpital avec le SIR pondéré |
+| `primary_uniform_final/` | Expérience finale sur l'école primaire avec le SIR uniforme |
 
-Les dossiers `hospital_uniform_final/` et `hospital_weighted_final/` contiennent les résultats hospitaliers retenus pour notre analyse comparative finale.
+Les trois expériences utilisent 200 simulations SIR par sélection évaluée. Les résultats numériques, les paramètres et les graphiques sont conservés pour permettre leur consultation et leur comparaison.
+
 
 ## 3. Contenu des dossiers d'expériences
 

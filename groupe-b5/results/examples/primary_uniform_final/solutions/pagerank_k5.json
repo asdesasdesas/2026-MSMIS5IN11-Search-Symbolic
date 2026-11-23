@@ -1,0 +1,16 @@
+{
+ "method": "pagerank",
+ "k": 5,
+ "selected": [
+  1551,
+  1665,
+  1673,
+  1761,
+  1780
+ ],
+ "coverage": 208,
+ "cut_weight": 8162,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.06325000000651926
+}

@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-11-20T20:43:40.035805+00:00",
+  "created_utc": "2026-11-23T09:13:33.954183+00:00",
   "input": "data/raw/primaryschool.csv.gz",
   "n_nodes": 242,
   "n_edges": 8317,
@@ -22,8 +22,8 @@
     "greedy_edges",
     "ilp_edges"
   ],
-  "runs": 35,
-  "random_draws": 5,
+  "runs": 200,
+  "random_draws": 10,
   "gamma": 0.2,
   "beta": 0.007935775906486912,
   "r0_target": 3.0,
@@ -35,11 +35,11 @@
   "seed_policy": "fixed",
   "ilp_time_limit": 8.0,
   "baseline": {
-    "mean": 0.8597402597402597,
-    "std": 0.034367922676124645,
-    "median": 0.8553719008264463,
-    "p_major": 1.0
+    "mean": 0.8322314049586776,
+    "std": 0.16942933759754172,
+    "median": 0.8636363636363636,
+    "p_major": 0.96
   },
-  "python": "3.13.5",
-  "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+  "python": "3.13.7",
+  "platform": "Windows-11-10.0.26300-SP0"
 }

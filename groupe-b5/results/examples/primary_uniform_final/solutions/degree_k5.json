@@ -1,0 +1,16 @@
+{
+ "method": "degree",
+ "k": 5,
+ "selected": [
+  1551,
+  1552,
+  1673,
+  1761,
+  1780
+ ],
+ "coverage": 210,
+ "cut_weight": 7367,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.00023060000967234373
+}

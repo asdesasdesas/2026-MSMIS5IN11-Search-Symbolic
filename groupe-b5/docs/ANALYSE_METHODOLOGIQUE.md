@@ -442,7 +442,13 @@ Elles constituent une validation fonctionnelle et numérique, et non une validat
 
 ## 7. Résultats expérimentaux et analyse comparative
 
-Le dossier `results/examples/` contient les premiers résultats obtenus à partir des données hospitalières et scolaires, sans inclure les fichiers de données brutes dans le dépôt.
+Le dossier `results/examples/` contient les résultats finaux de nos trois expériences sur les données SocioPatterns, sans inclure les fichiers de données brutes dans le dépôt.
+
+Les expériences retenues sont :
+- l'hôpital avec le modèle SIR uniforme ;
+- l'hôpital avec le modèle SIR pondéré ;
+- l'école primaire avec le modèle SIR uniforme.
+
 
 Les paramètres exacts de chaque expérience sont enregistrés dans les fichiers `config.json`.
 
@@ -458,13 +464,11 @@ Les graphiques permettent notamment de comparer :
 - le compromis entre la qualité des solutions et le temps
   de calcul.
 
-Les premières expériences, réalisées avec 35 ou 55 répétitions demandées selon le jeu de données, constituent des résultats exploratoires.
+Pour les trois expériences finales, nous avons réalisé 200 simulations SIR par sélection évaluée.
 
-Le nombre effectif de simulations peut dépendre de la méthode, notamment pour la sélection aléatoire qui utilise plusieurs ensembles de personnes sélectionnées.
+La méthode aléatoire utilise également 10 tirages de sélections différentes afin de prendre en compte la variabilité liée au choix des personnes à immuniser.
 
-Ces résultats permettent d'illustrer le fonctionnement du projet, mais ne sont pas suffisants pour établir des conclusions cliniques.
-
-L'augmentation du nombre de simulations et l'étude de la variabilité des résultats permettent d'améliorer la robustesse des comparaisons.
+Ces répétitions permettent de mieux évaluer les performances des différentes méthodes, même si les résultats restent dépendants des paramètres du modèle et des tirages aléatoires.
 
 ### 7.1. Résultats sur l'école primaire (protocole final)
 

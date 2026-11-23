@@ -1,0 +1,16 @@
+{
+ "method": "greedy_edges",
+ "k": 5,
+ "selected": [
+  1558,
+  1613,
+  1665,
+  1695,
+  1697
+ ],
+ "coverage": 202,
+ "cut_weight": 11691,
+ "objective": "cut_weight",
+ "optimal": null,
+ "time_s": 0.05368040001485497
+}
