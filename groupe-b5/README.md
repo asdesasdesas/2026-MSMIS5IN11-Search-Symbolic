@@ -11,11 +11,11 @@
 | `A03h06A` | Méthodes d’optimisation (glouton, ILP et centralités), vérificateur indépendant, exécution des expériences et génération des graphiques | `src/selection.py`, `src/verifier.py`, `src/run_experiments.py`, `src/plots.py`, `tests/` |
 | Travail commun | Relectures, validation des résultats, préparation de la démonstration et de la soutenance | `notebooks/`, `slides/`, `README.md`, `results/examples/` |
 
-Nous avons utilisé des assistants IA, notamment ChatGPT et Claude, pour nous aider à comprendre et développer certaines parties du code, à rédiger la documentation et à analyser les résultats. Nous avons exécuté les expériences en local et vérifié les sorties avec les tests et le vérificateur du projet.
+Nous avons utilisé des assistants IA, notamment ChatGPT et Claude, pour nous aider à comprendre et optimiser certaines parties du code, à améliorer la documentation et à analyser les résultats. Nous avons exécuté les expériences en local et vérifié les sorties avec les tests et le vérificateur du projet.
 
 ## 2. Présentation du projet
 
-Notre sujet est le **B5 — « Qui tester en priorité ? »**. Nous cherchons à déterminer quelles personnes cibler sur un réseau de contacts lorsqu’on dispose d’un budget d’intervention limité à `k` personnes.
+Notre sujet est le **B5 - « Qui tester en priorité ? »**. Nous cherchons à déterminer quelles personnes cibler sur un réseau de contacts lorsqu’on dispose d’un budget d’intervention limité à `k` personnes.
 
 Nous avons d’abord construit des graphes à partir de deux jeux de données SocioPatterns : un réseau de contacts dans un hôpital et un réseau dans une école primaire. Nous avons ensuite implémenté plusieurs méthodes pour choisir les personnes à immuniser, notamment des méthodes fondées sur les centralités du graphe, un algorithme glouton et une formulation en programmation linéaire en nombres entiers (ILP).
 
