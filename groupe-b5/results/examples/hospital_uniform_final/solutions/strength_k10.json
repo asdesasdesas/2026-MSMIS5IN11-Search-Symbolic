@@ -1,0 +1,21 @@
+{
+ "method": "strength",
+ "k": 10,
+ "selected": [
+  1115,
+  1144,
+  1149,
+  1157,
+  1164,
+  1193,
+  1207,
+  1210,
+  1221,
+  1295
+ ],
+ "coverage": 73,
+ "cut_weight": 22773,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.0002889000024879351
+}

@@ -1,0 +1,13 @@
+{
+ "method": "closeness",
+ "k": 2,
+ "selected": [
+  1098,
+  1193
+ ],
+ "coverage": 71,
+ "cut_weight": 3630,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.003706900002725888
+}

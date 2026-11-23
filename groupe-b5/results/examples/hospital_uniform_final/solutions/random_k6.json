@@ -1,0 +1,17 @@
+{
+ "method": "random",
+ "k": 6,
+ "selected": [
+  1108,
+  1157,
+  1168,
+  1210,
+  1238,
+  1261
+ ],
+ "coverage": 72,
+ "cut_weight": 8092,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 1.3949999993201345e-05
+}

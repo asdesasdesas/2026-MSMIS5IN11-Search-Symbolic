@@ -1,0 +1,21 @@
+{
+ "method": "betweenness",
+ "k": 10,
+ "selected": [
+  1098,
+  1109,
+  1115,
+  1157,
+  1164,
+  1190,
+  1193,
+  1210,
+  1295,
+  1658
+ ],
+ "coverage": 74,
+ "cut_weight": 19507,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.025830700004007667
+}

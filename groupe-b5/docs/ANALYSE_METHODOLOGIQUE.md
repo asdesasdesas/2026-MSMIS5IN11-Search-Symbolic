@@ -576,7 +576,7 @@ L'optimalité combinatoire doit donc être distinguée de l'efficacité épidém
 
 **Compromis entre efficacité et temps de calcul.**
 
-Pour k = 10 dans le modèle pondéré, Greedy_edges et ILP_edges obtiennent le même taux d’attaque moyen (32,8 %) et la même couverture (73 personnes), mais leurs temps de sélection affichés sont respectivement de 0,0074 s et 0,0476 s. Sur cette exécution, le glouton est donc environ 6,4 fois plus rapide. À titre de comparaison, Degree demande environ 0,0001 s et Strength 0,0002 s, pour des taux d'attaque moyens respectifs de 38,2 % et 32,8 %.
+Pour k = 10 dans le modèle pondéré, Greedy_edges et ILP_edges obtiennent le même taux d’attaque moyen (32,8 %) et la même couverture (73 personnes), mais leurs temps de sélection affichés sont respectivement de 0,0070 s et 0,0475 s. Sur cette exécution, le glouton est donc environ 6,8 fois plus rapide. À titre de comparaison, Degree demande environ 0,0001 s et Strength 0,0002 s, pour des taux d'attaque moyens respectifs de 38,2 % et 32,8 %.
 
 Ces temps sont très courts et dépendent de la machine et des conditions d'exécution. Une évaluation fiable des performances nécessiterait des mesures répétées ; une comparaison unique ne permet pas d'affirmer qu'un algorithme est toujours plus rapide.
 

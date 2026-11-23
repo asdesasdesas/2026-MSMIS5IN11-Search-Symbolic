@@ -1,0 +1,13 @@
+{
+ "method": "kcore",
+ "k": 2,
+ "selected": [
+  1115,
+  1210
+ ],
+ "coverage": 65,
+ "cut_weight": 7304,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.0011183999959030189
+}

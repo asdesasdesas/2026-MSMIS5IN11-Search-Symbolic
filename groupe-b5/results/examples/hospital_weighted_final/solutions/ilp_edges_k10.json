@@ -1,0 +1,21 @@
+{
+ "method": "ilp_edges",
+ "k": 10,
+ "selected": [
+  1115,
+  1144,
+  1149,
+  1157,
+  1164,
+  1193,
+  1207,
+  1210,
+  1221,
+  1295
+ ],
+ "coverage": 73,
+ "cut_weight": 22773,
+ "objective": "cut_weight",
+ "optimal": true,
+ "time_s": 0.047507400005997624
+}

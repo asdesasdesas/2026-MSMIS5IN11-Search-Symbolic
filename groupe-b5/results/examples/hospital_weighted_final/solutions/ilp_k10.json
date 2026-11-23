@@ -1,0 +1,21 @@
+{
+ "method": "ilp",
+ "k": 10,
+ "selected": [
+  1130,
+  1193,
+  1207,
+  1232,
+  1395,
+  1525,
+  1547,
+  1671,
+  1701,
+  1784
+ ],
+ "coverage": 75,
+ "cut_weight": 7467,
+ "objective": "coverage",
+ "optimal": true,
+ "time_s": 0.01626380000379868
+}

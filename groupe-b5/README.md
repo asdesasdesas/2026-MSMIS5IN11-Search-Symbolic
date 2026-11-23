@@ -108,7 +108,7 @@ Une solution optimale pour la couverture n'est pas nécessairement celle qui ré
 
 ## 5. Installation
 
-Le projet utilise Python 3.11 ou 3.12 et les dépendances indiquées dans les fichiers `requirements`.
+Le projet utilise Python 3.11 à 3.13 et les dépendances indiquées dans les fichiers `requirements`.
 
 ```bash
 cd groupe-b5
@@ -263,7 +263,7 @@ Le classement observé dépend donc du modèle de transmission.
 
 **Lien entre couverture et propagation :** `ilp` couvre les 75 personnes pour `k = 10` dans les deux scénarios, mais son taux d'attaque reste de 63,9 % en uniforme et de 60,5 % en pondéré. Des ensembles ayant la même couverture peuvent avoir des effets épidémiques différents.
 
-**Temps de calcul :** pour `k = 10` en pondéré, `greedy_edges` et `ilp_edges` ont le même taux d'attaque moyen (32,8 %), avec des temps de sélection d'environ 0,007 s et 0,048 s lors de la dernière exécution. Ces temps dépendent de la machine et ne constituent pas un benchmark répété.
+**Temps de calcul :** pour `k = 10` en pondéré, `greedy_edges` et `ilp_edges` ont le même taux d'attaque moyen (32,8 %), avec des temps de sélection d'environ 0,0070 s et 0,0475 s lors de la dernière exécution. Ces temps dépendent de la machine et ne constituent pas un benchmark répété.
 
 **Variabilité des simulations :** dans le scénario uniforme (`k = 10`), l'IC 95 % du taux d'attaque de `degree` est d'environ [38,7 % ; 45,2 %] contre [61,8 % ; 66,4 %] pour `random`. En pondéré, l'IC de `strength` est d'environ [29,9 % ; 35,6 %] contre [55,3 % ; 60,1 %] pour `random`.
 

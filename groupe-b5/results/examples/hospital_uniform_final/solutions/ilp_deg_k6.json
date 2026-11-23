@@ -1,0 +1,17 @@
+{
+ "method": "ilp_deg",
+ "k": 6,
+ "selected": [
+  1098,
+  1115,
+  1164,
+  1193,
+  1210,
+  1365
+ ],
+ "coverage": 75,
+ "cut_weight": 12758,
+ "objective": "coverage",
+ "optimal": true,
+ "time_s": 0.05592690000048606
+}

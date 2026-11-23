@@ -1,0 +1,17 @@
+{
+ "method": "greedy",
+ "k": 6,
+ "selected": [
+  1098,
+  1115,
+  1164,
+  1193,
+  1210,
+  1378
+ ],
+ "coverage": 75,
+ "cut_weight": 12514,
+ "objective": "coverage",
+ "optimal": null,
+ "time_s": 0.0015213999940897338
+}
