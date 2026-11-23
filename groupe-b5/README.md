@@ -11,7 +11,7 @@
 | `A03h06A` | Méthodes d’optimisation (glouton, ILP et centralités), vérificateur indépendant, exécution des expériences et génération des graphiques | `src/selection.py`, `src/verifier.py`, `src/run_experiments.py`, `src/plots.py`, `tests/` |
 | Travail commun | Relectures, validation des résultats, préparation de la démonstration et de la soutenance | `notebooks/`, `slides/`, `README.md`, `results/examples/` |
 
-Nous avons utilisé des assistants IA, notamment ChatGPT et Claude, pour nous aider à comprendre et optimiser certaines parties du code, à améliorer la documentation et à analyser les résultats. Nous avons exécuté les expériences en local et vérifié les sorties avec les tests et le vérificateur du projet.
+Nous avons utilisé des assistants IA, notamment ChatGPT et Claude, afin de nous aider à optimiser et comprendre certaines parties du code, ainsi qu'à améliorer la documentation et à analyser les résultats. Nous avons exécuté les expériences en local et vérifié les sorties avec les tests et le vérificateur du projet.
 
 ## 2. Présentation du projet
 
