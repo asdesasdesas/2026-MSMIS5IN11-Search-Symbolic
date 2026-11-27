@@ -1,0 +1,10 @@
+# Versions figees : le guide du cours demande une installation reproductible.
+# Mettre a jour ces numeros avec ceux reellement installes
+# (pip freeze | grep -iE "rdkit|selfies|pytest").
+rdkit==2026.9.2
+selfies==2.1.1
+pytest==8.4.2
+
+# Pour le notebook d'analyse :
+matplotlib==3.10.8
+pandas==2.3.3
